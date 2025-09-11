@@ -190,3 +190,4 @@ src/
 ### Logs
 - Development: Console logs with morgan
 - Production: Configure proper logging service
+

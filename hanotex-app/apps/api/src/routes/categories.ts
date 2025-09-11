@@ -13,11 +13,10 @@ router.get('/', async (req, res) => {
         name,
         code,
         parent_id,
-        level,
         description,
         created_at
       FROM categories 
-      ORDER BY level, name
+      ORDER BY name
     `);
 
     // Organize categories into hierarchy
@@ -26,12 +25,12 @@ router.get('/', async (req, res) => {
     const rootCategories: any[] = [];
 
     // Create a map of all categories
-    categories.forEach(category => {
+    categories.forEach((category: any) => {
       categoryMap.set(category.id, { ...category, children: [] });
     });
 
     // Build hierarchy
-    categories.forEach(category => {
+    categories.forEach((category: any) => {
       if (category.parent_id) {
         const parent = categoryMap.get(category.parent_id);
         if (parent) {
@@ -108,8 +107,9 @@ router.get('/:id/technologies', async (req, res) => {
   try {
     const { id } = req.params;
     const { page = 1, limit = 20 } = req.query;
-
-    const offset = (page - 1) * limit;
+    const pageNum = parseInt(page as string) || 1;
+    const limitNum = parseInt(limit as string) || 20;
+    const offset = (pageNum - 1) * limitNum;
 
     // Get total count
     const countResult = await query(
@@ -162,3 +162,4 @@ router.get('/:id/technologies', async (req, res) => {
 });
 
 export default router;
+

@@ -203,6 +203,19 @@ export interface PaginationParams {
   order?: 'ASC' | 'DESC';
 }
 
+export interface TechnologySearchParams extends PaginationParams {
+  query?: string;
+  search?: string;
+  category_id?: string;
+  category?: string;
+  trl_level?: number | string;
+  status?: TechnologyStatus | string;
+  user_type?: UserType | string;
+  min_price?: number;
+  max_price?: number;
+  territory?: string;
+}
+
 // Request interfaces
 export interface LoginRequest {
   email: string;
@@ -275,3 +288,4 @@ export interface UserSearchParams extends PaginationParams {
   is_verified?: boolean;
   is_active?: boolean;
 }
+

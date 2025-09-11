@@ -257,3 +257,4 @@ export const useTechnologyActions = () => useTechnologyStore((state) => ({
   clearCurrentTechnology: state.clearCurrentTechnology,
   clearError: state.clearError,
 }));
+

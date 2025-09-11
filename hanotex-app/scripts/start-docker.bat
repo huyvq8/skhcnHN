@@ -65,3 +65,4 @@ echo To check data: scripts\check-data.bat
 echo To stop services: docker-compose down
 echo.
 pause
+

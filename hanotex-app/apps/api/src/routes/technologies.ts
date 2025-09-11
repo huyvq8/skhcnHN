@@ -1,5 +1,5 @@
 import express from 'express';
-import { query } from '../config/database';
+import { query, transaction } from '../config/database';
 import { authenticateToken, optionalAuth, requireRole } from '../middleware/auth';
 import { validate, validateQuery, schemas } from '../middleware/validation';
 import { ApiResponse, TechnologySearchParams, TechnologyCreateRequest } from '../types';
@@ -11,7 +11,9 @@ router.get('/', validateQuery(schemas.technologySearch), optionalAuth, async (re
   try {
     const {
       query: searchQuery,
+      search,
       category_id,
+      category,
       trl_level,
       status,
       user_type,
@@ -24,6 +26,10 @@ router.get('/', validateQuery(schemas.technologySearch), optionalAuth, async (re
       order = 'DESC'
     }: TechnologySearchParams = req.query;
 
+    // Use search parameter if query is not provided
+    const finalSearchQuery = searchQuery || search;
+    const finalCategoryId = category_id || category;
+
     const offset = (page - 1) * limit;
     const userId = req.user?.userId;
 
@@ -32,25 +38,25 @@ router.get('/', validateQuery(schemas.technologySearch), optionalAuth, async (re
     let queryParams: any[] = ['APPROVED', 'ACTIVE'];
     let paramIndex = 3;
 
-    if (searchQuery) {
+    if (finalSearchQuery && finalSearchQuery.trim() !== '') {
       whereConditions.push(`(t.title ILIKE $${paramIndex} OR t.public_summary ILIKE $${paramIndex})`);
-      queryParams.push(`%${searchQuery}%`);
+      queryParams.push(`%${finalSearchQuery}%`);
       paramIndex++;
     }
 
-    if (category_id) {
+    if (finalCategoryId && finalCategoryId.trim() !== '') {
       whereConditions.push(`t.category_id = $${paramIndex}`);
-      queryParams.push(category_id);
+      queryParams.push(finalCategoryId);
       paramIndex++;
     }
 
-    if (trl_level) {
+    if (trl_level && trl_level !== '' && !isNaN(Number(trl_level))) {
       whereConditions.push(`t.trl_level = $${paramIndex}`);
-      queryParams.push(trl_level);
+      queryParams.push(Number(trl_level));
       paramIndex++;
     }
 
-    if (status) {
+    if (status && status.trim() !== '') {
       whereConditions = ['t.status = $1']; // Override default status filter
       queryParams = [status];
       paramIndex = 2;
@@ -105,7 +111,7 @@ router.get('/', validateQuery(schemas.technologySearch), optionalAuth, async (re
 
     // Get technology owners for each technology
     const technologies = await Promise.all(
-      technologiesResult.rows.map(async (tech) => {
+      technologiesResult.rows.map(async (tech: any) => {
         const ownersResult = await query(
           'SELECT owner_type, owner_name, ownership_percentage FROM technology_owners WHERE technology_id = $1',
           [tech.id]
@@ -244,7 +250,7 @@ router.post('/', authenticateToken, validate(schemas.technology), async (req, re
     const technologyData: TechnologyCreateRequest = req.body;
 
     // Start transaction
-    const result = await query(async (client) => {
+    const result = await transaction(async (client) => {
       // Create technology
       const techResult = await client.query(`
         INSERT INTO technologies (
@@ -519,3 +525,4 @@ router.post('/:id/submit', authenticateToken, async (req, res) => {
 });
 
 export default router;
+

@@ -145,17 +145,22 @@ export const schemas = {
 
   // Search schemas
   technologySearch: Joi.object({
-    query: Joi.string().optional(),
-    category_id: Joi.string().uuid().optional(),
-    trl_level: Joi.number().integer().min(1).max(9).optional(),
-    status: Joi.string().valid('DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'ACTIVE', 'INACTIVE').optional(),
-    user_type: Joi.string().valid('INDIVIDUAL', 'COMPANY', 'RESEARCH_INSTITUTION').optional(),
+    query: Joi.string().allow('').optional(),
+    search: Joi.string().allow('').optional(), // Support both query and search parameters
+    category_id: Joi.string().uuid().allow('').optional(),
+    category: Joi.string().allow('').optional(), // Support both category_id and category parameters
+    trl_level: Joi.alternatives().try(
+      Joi.number().integer().min(1).max(9),
+      Joi.string().allow('').optional()
+    ).optional(),
+    status: Joi.string().valid('DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'ACTIVE', 'INACTIVE').allow('').optional(),
+    user_type: Joi.string().valid('INDIVIDUAL', 'COMPANY', 'RESEARCH_INSTITUTION').allow('').optional(),
     min_price: Joi.number().min(0).optional(),
     max_price: Joi.number().min(0).optional(),
-    territory: Joi.string().optional(),
+    territory: Joi.string().allow('').optional(),
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(20),
-    sort: Joi.string().optional(),
+    sort: Joi.string().allow('').optional(),
     order: Joi.string().valid('ASC', 'DESC').default('DESC')
   }),
 
@@ -184,3 +189,4 @@ export const schemas = {
     order: Joi.string().valid('ASC', 'DESC').default('DESC')
   })
 };
+

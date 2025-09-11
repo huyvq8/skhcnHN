@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, Rocket, Users, TrendingUp } from 'lucide-react';
 
@@ -19,13 +18,7 @@ export default function CTASection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           {/* Main CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
+          <div className="mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Sẵn sàng tham gia cộng đồng công nghệ?
             </h2>
@@ -36,7 +29,7 @@ export default function CTASection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/register"
-                className="btn bg-white text-primary-600 hover:bg-gray-100 btn-lg group"
+                className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white text-primary-600 hover:bg-gray-100 focus:ring-white group"
               >
                 <Rocket className="mr-2 h-5 w-5" />
                 Đăng ký miễn phí
@@ -44,22 +37,16 @@ export default function CTASection() {
               </Link>
               <Link
                 href="/technologies"
-                className="btn border-2 border-white text-white hover:bg-white hover:text-primary-600 btn-lg group"
+                className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border-2 border-white text-white hover:bg-white hover:text-primary-600 focus:ring-white group"
               >
                 Khám phá ngay
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-          </motion.div>
+          </div>
 
           {/* Benefits */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
                 <Rocket className="h-8 w-8 text-white" />
@@ -95,16 +82,10 @@ export default function CTASection() {
                 Phát triển và thương mại hóa công nghệ hiệu quả
               </p>
             </div>
-          </motion.div>
+          </div>
 
           {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="mt-16 pt-8 border-t border-white border-opacity-20"
-          >
+          <div className="mt-16 pt-8 border-t border-white border-opacity-20">
             <p className="text-primary-100 mb-4">
               Cần hỗ trợ? Liên hệ với chúng tôi
             </p>
@@ -127,7 +108,7 @@ export default function CTASection() {
                 🕒 24/7 Hỗ trợ
               </span>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

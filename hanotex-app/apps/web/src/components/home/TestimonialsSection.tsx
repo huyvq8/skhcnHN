@@ -1,169 +1,180 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
   {
     name: 'Nguyễn Văn An',
-    role: 'Giám đốc Công nghệ',
+    position: 'Giám đốc Công nghệ',
     company: 'TechCorp Vietnam',
-    avatar: '/avatars/avatar-1.jpg',
-    content: 'HANOTEX đã giúp chúng tôi tìm được công nghệ AI phù hợp cho dự án. Quy trình giao dịch rất minh bạch và chuyên nghiệp.',
+    content: 'HANOTEX đã giúp chúng tôi tìm được đối tác phù hợp để chuyển giao công nghệ AI. Quy trình đơn giản và hiệu quả.',
     rating: 5,
+    avatar: '/avatars/nguyen-van-an.jpg',
   },
   {
     name: 'Trần Thị Bình',
-    role: 'Trưởng phòng R&D',
-    company: 'Innovation Lab',
-    avatar: '/avatars/avatar-2.jpg',
-    content: 'Sàn giao dịch này thực sự kết nối được cộng đồng nghiên cứu. Chúng tôi đã chuyển giao thành công 3 công nghệ trong 6 tháng.',
+    position: 'Nghiên cứu viên',
+    company: 'Viện Khoa học Công nghệ',
+    content: 'Sàn giao dịch này thực sự hữu ích cho việc kết nối giữa nghiên cứu và ứng dụng thực tế. Tôi đã tìm được nhiều cơ hội hợp tác.',
     rating: 5,
+    avatar: '/avatars/tran-thi-binh.jpg',
   },
   {
     name: 'Lê Minh Cường',
-    role: 'Startup Founder',
-    company: 'GreenTech Solutions',
-    avatar: '/avatars/avatar-3.jpg',
-    content: 'HANOTEX là cầu nối tuyệt vời giữa nghiên cứu và thương mại. Chúng tôi đã tìm được đối tác phù hợp cho sản phẩm của mình.',
+    position: 'CEO',
+    company: 'StartupTech',
+    content: 'HANOTEX không chỉ là nơi giao dịch mà còn là cộng đồng học hỏi và chia sẻ kinh nghiệm. Rất recommend!',
     rating: 5,
+    avatar: '/avatars/le-minh-cuong.jpg',
   },
   {
     name: 'Phạm Thị Dung',
-    role: 'Nghiên cứu viên',
-    company: 'Viện Khoa học Công nghệ',
-    avatar: '/avatars/avatar-4.jpg',
-    content: 'Giao diện thân thiện, dễ sử dụng. Chúng tôi có thể dễ dàng đăng tải và quản lý các công nghệ của mình.',
+    position: 'Quản lý Dự án',
+    company: 'Innovation Hub',
+    content: 'Chúng tôi đã thành công chuyển giao 3 công nghệ thông qua HANOTEX. Dịch vụ hỗ trợ rất chuyên nghiệp.',
     rating: 5,
+    avatar: '/avatars/pham-thi-dung.jpg',
   },
   {
     name: 'Hoàng Văn Em',
-    role: 'CTO',
-    company: 'Digital Solutions',
-    avatar: '/avatars/avatar-5.jpg',
-    content: 'Hệ thống bảo mật tốt, thông tin được bảo vệ an toàn. Chúng tôi tin tưởng khi giao dịch trên sàn này.',
+    position: 'Kỹ sư Công nghệ',
+    company: 'GreenTech Solutions',
+    content: 'Giao diện thân thiện, dễ sử dụng. Tôi có thể dễ dàng tìm kiếm và so sánh các công nghệ phù hợp với nhu cầu.',
     rating: 5,
+    avatar: '/avatars/hoang-van-em.jpg',
   },
   {
     name: 'Vũ Thị Phương',
-    role: 'Giám đốc Điều hành',
-    company: 'BioTech Innovations',
-    avatar: '/avatars/avatar-6.jpg',
-    content: 'HANOTEX đã giúp chúng tôi mở rộng mạng lưới đối tác và tìm được nhiều cơ hội hợp tác mới.',
+    position: 'Giám đốc R&D',
+    company: 'BioTech Vietnam',
+    content: 'HANOTEX đã mở ra nhiều cơ hội hợp tác quốc tế cho chúng tôi. Thực sự là cầu nối quan trọng trong hệ sinh thái công nghệ.',
     rating: 5,
+    avatar: '/avatars/vu-thi-phuong.jpg',
   },
 ];
 
 export default function TestimonialsSection() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
+        <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Khách hàng nói gì về chúng tôi
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Những phản hồi tích cực từ cộng đồng người dùng HANOTEX
+            Những chia sẻ chân thực từ các đối tác đã tin tưởng và sử dụng dịch vụ của HANOTEX
           </p>
-        </motion.div>
+        </div>
 
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <motion.div
+            <div
               key={testimonial.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="card hover:shadow-medium transition-all duration-300"
+              className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300"
             >
-              <div className="card-body">
-                {/* Quote Icon */}
-                <div className="flex justify-center mb-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                    <Quote className="h-6 w-6 text-primary-600" />
-                  </div>
+              {/* Quote Icon */}
+              <div className="flex items-center justify-center w-12 h-12 bg-primary-100 text-primary-600 rounded-full mb-4">
+                <Quote className="h-6 w-6" />
+              </div>
+
+              {/* Rating */}
+              <div className="flex items-center mb-4">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+
+              {/* Content */}
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                "{testimonial.content}"
+              </p>
+
+              {/* Author */}
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-gray-600 font-semibold text-lg">
+                    {testimonial.name.split(' ').map(n => n[0]).join('')}
+                  </span>
                 </div>
-
-                {/* Rating */}
-                <div className="flex justify-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-
-                {/* Content */}
-                <p className="text-gray-600 text-center mb-6 italic">
-                  "{testimonial.content}"
-                </p>
-
-                {/* Author */}
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <span className="text-xl font-semibold text-gray-600">
-                      {testimonial.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                  <h4 className="font-semibold text-gray-900">
+                <div>
+                  <div className="font-semibold text-gray-900">
                     {testimonial.name}
-                  </h4>
-                  <p className="text-sm text-gray-500">
-                    {testimonial.role}
-                  </p>
-                  <p className="text-sm text-primary-600 font-medium">
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {testimonial.position}
+                  </div>
+                  <div className="text-sm text-primary-600 font-medium">
                     {testimonial.company}
-                  </p>
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          viewport={{ once: true }}
-          className="mt-16 text-center"
-        >
-          <div className="bg-gray-50 rounded-2xl p-8 max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <div className="text-3xl font-bold text-primary-600 mb-2">
-                  4.9/5
-                </div>
-                <div className="text-gray-600">
-                  Đánh giá trung bình
-                </div>
+        <div className="mt-16 bg-white rounded-2xl shadow-lg p-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-primary-600 mb-2">
+                98%
               </div>
-              <div>
-                <div className="text-3xl font-bold text-primary-600 mb-2">
-                  95%
-                </div>
-                <div className="text-gray-600">
-                  Khách hàng hài lòng
-                </div>
+              <div className="text-gray-600">
+                Khách hàng hài lòng
               </div>
-              <div>
-                <div className="text-3xl font-bold text-primary-600 mb-2">
-                  500+
-                </div>
-                <div className="text-gray-600">
-                  Đánh giá tích cực
-                </div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-secondary-600 mb-2">
+                4.9/5
+              </div>
+              <div className="text-gray-600">
+                Đánh giá trung bình
+              </div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-accent-600 mb-2">
+                500+
+              </div>
+              <div className="text-gray-600">
+                Đánh giá tích cực
+              </div>
+            </div>
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-purple-600 mb-2">
+                24/7
+              </div>
+              <div className="text-gray-600">
+                Hỗ trợ khách hàng
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="text-center mt-16">
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+            Bạn cũng muốn chia sẻ trải nghiệm?
+          </h3>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Tham gia cộng đồng HANOTEX và chia sẻ câu chuyện thành công của bạn
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/register"
+              className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500"
+            >
+              Tham gia ngay
+            </a>
+            <a
+              href="/contact"
+              className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-500"
+            >
+              Liên hệ chúng tôi
+            </a>
+          </div>
+        </div>
       </div>
     </section>
   );

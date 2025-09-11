@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -79,7 +81,9 @@ export default function RootLayout({
       <body className={`${inter.className} h-full antialiased`}>
         <Providers>
           <div className="min-h-full">
+            <Header />
             {children}
+            <Footer />
           </div>
           <Toaster
             position="top-right"
@@ -110,3 +114,4 @@ export default function RootLayout({
     </html>
   );
 }
+

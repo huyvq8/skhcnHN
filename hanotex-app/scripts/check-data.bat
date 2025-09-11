@@ -23,3 +23,4 @@ echo If you see data above, the database is working correctly.
 echo If you see errors, please check the setup.
 echo.
 pause
+

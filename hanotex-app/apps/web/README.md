@@ -285,3 +285,4 @@ DEBUG=* npm run dev
 ## 📄 License
 
 MIT License - see LICENSE file for details.
+

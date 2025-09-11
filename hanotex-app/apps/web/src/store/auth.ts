@@ -5,8 +5,8 @@ import apiClient from '@/lib/api';
 
 interface AuthStore extends AuthState {
   // Actions
-  login: (credentials: LoginRequest) => Promise<boolean>;
-  register: (userData: RegisterRequest) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, userType: string, profile: any) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
@@ -23,11 +23,11 @@ export const useAuthStore = create<AuthStore>()(
       isLoading: false,
 
       // Actions
-      login: async (credentials: LoginRequest) => {
+      login: async (email: string, password: string) => {
         set({ isLoading: true });
         
         try {
-          const response = await apiClient.login(credentials);
+          const response = await apiClient.login({ email, password });
           
           if (response.success && response.data) {
             const { user, token } = response.data;
@@ -37,35 +37,40 @@ export const useAuthStore = create<AuthStore>()(
               isAuthenticated: true,
               isLoading: false,
             });
-            return true;
           } else {
             set({ isLoading: false });
-            return false;
+            throw new Error(response.error || 'Đăng nhập thất bại');
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Login error:', error);
           set({ isLoading: false });
-          return false;
+          throw error;
         }
       },
 
-      register: async (userData: RegisterRequest) => {
+      register: async (email: string, password: string, userType: string, profile: any) => {
         set({ isLoading: true });
         
         try {
+          const userData = {
+            email,
+            password,
+            user_type: userType,
+            profile
+          };
+          
           const response = await apiClient.register(userData);
           
           if (response.success) {
             set({ isLoading: false });
-            return true;
           } else {
             set({ isLoading: false });
-            return false;
+            throw new Error(response.error || 'Đăng ký thất bại');
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Registration error:', error);
           set({ isLoading: false });
-          return false;
+          throw error;
         }
       },
 
@@ -137,3 +142,4 @@ export const useAuthActions = () => useAuthStore((state) => ({
 export const useUser = () => useAuthStore((state) => state.user);
 export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
 export const useIsLoading = () => useAuthStore((state) => state.isLoading);
+

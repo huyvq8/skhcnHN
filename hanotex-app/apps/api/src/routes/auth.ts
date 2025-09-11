@@ -1,10 +1,10 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { query } from '../config/database';
+import { query, transaction } from '../config/database';
 import { authenticateToken } from '../middleware/auth';
 import { validate, schemas } from '../middleware/validation';
-import { ApiResponse, LoginRequest, RegisterRequest, JWTPayload } from '../types';
+import { ApiResponse, LoginRequest, RegisterRequest, JWTPayload, IndividualProfile, CompanyProfile, ResearchProfile } from '../types';
 
 const router = express.Router();
 
@@ -63,7 +63,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
       userType: user.user_type
     };
 
-    const token = jwt.sign(tokenPayload, jwtSecret, { expiresIn: jwtExpiresIn });
+    const token = (jwt as any).sign(tokenPayload, jwtSecret, { expiresIn: jwtExpiresIn });
 
     // Get user profile based on type
     let profile = null;
@@ -139,7 +139,7 @@ router.post('/register', validate(schemas.register), async (req, res) => {
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     // Start transaction
-    const result = await query(async (client) => {
+    const result = await transaction(async (client) => {
       // Create user
       const userResult = await client.query(
         'INSERT INTO users (email, password_hash, user_type, role, is_verified, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, user_type, role, is_verified, is_active',
@@ -151,19 +151,22 @@ router.post('/register', validate(schemas.register), async (req, res) => {
       // Create profile based on user type
       let profileResult;
       if (user_type === 'INDIVIDUAL') {
+        const individualProfile = profile as Partial<IndividualProfile>;
         profileResult = await client.query(
           'INSERT INTO individual_profiles (user_id, full_name, id_number, phone, profession, bank_account) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-          [user.id, profile.full_name, profile.id_number, profile.phone, profile.profession, profile.bank_account]
+          [user.id, individualProfile.full_name, individualProfile.id_number, individualProfile.phone, individualProfile.profession, individualProfile.bank_account]
         );
       } else if (user_type === 'COMPANY') {
+        const companyProfile = profile as Partial<CompanyProfile>;
         profileResult = await client.query(
           'INSERT INTO company_profiles (user_id, company_name, tax_code, business_license, legal_representative, contact_email, production_capacity) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-          [user.id, profile.company_name, profile.tax_code, profile.business_license, profile.legal_representative, profile.contact_email, profile.production_capacity]
+          [user.id, companyProfile.company_name, companyProfile.tax_code, companyProfile.business_license, companyProfile.legal_representative, companyProfile.contact_email, companyProfile.production_capacity]
         );
       } else if (user_type === 'RESEARCH_INSTITUTION') {
+        const researchProfile = profile as Partial<ResearchProfile>;
         profileResult = await client.query(
           'INSERT INTO research_profiles (user_id, institution_name, institution_code, governing_body, research_task_code, acceptance_report, research_group) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-          [user.id, profile.institution_name, profile.institution_code, profile.governing_body, profile.research_task_code, profile.acceptance_report, profile.research_group]
+          [user.id, researchProfile.institution_name, researchProfile.institution_code, researchProfile.governing_body, researchProfile.research_task_code, researchProfile.acceptance_report, researchProfile.research_group]
         );
       }
 
@@ -300,7 +303,7 @@ router.post('/refresh', authenticateToken, async (req, res) => {
       userType: user.user_type
     };
 
-    const token = jwt.sign(tokenPayload, jwtSecret, { expiresIn: jwtExpiresIn });
+    const token = (jwt as any).sign(tokenPayload, jwtSecret, { expiresIn: jwtExpiresIn });
 
     const response: ApiResponse = {
       success: true,
@@ -323,3 +326,4 @@ router.post('/refresh', authenticateToken, async (req, res) => {
 });
 
 export default router;
+

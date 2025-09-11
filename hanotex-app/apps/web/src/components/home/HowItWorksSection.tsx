@@ -1,7 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { UserPlus, Upload, Search, Handshake, Award, TrendingUp } from 'lucide-react';
+import { UserPlus, Upload, Search, Users, Award, TrendingUp } from 'lucide-react';
 
 const steps = [
   {
@@ -26,7 +25,7 @@ const steps = [
     bgColor: 'bg-accent-100',
   },
   {
-    icon: Handshake,
+    icon: Users,
     title: 'Kết nối & Thương lượng',
     description: 'Liên hệ trực tiếp với chủ sở hữu để thương lượng và đàm phán',
     color: 'text-purple-600',
@@ -53,30 +52,20 @@ export default function HowItWorksSection() {
     <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
+        <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Cách thức hoạt động
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Quy trình đơn giản và minh bạch để tham gia sàn giao dịch công nghệ HANOTEX
           </p>
-        </motion.div>
+        </div>
 
         {/* Steps Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {steps.map((step, index) => (
-            <motion.div
+            <div
               key={step.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
               className="relative"
             >
               {/* Step Number */}
@@ -85,8 +74,8 @@ export default function HowItWorksSection() {
               </div>
 
               {/* Card */}
-              <div className="card h-full">
-                <div className="card-body text-center">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-full">
+                <div className="px-6 py-4 text-center">
                   {/* Icon */}
                   <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${step.bgColor} ${step.color} mb-4`}>
                     <step.icon className="h-8 w-8" />
@@ -108,19 +97,13 @@ export default function HowItWorksSection() {
               {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gray-200 transform -translate-y-1/2 z-0" />
               )}
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          viewport={{ once: true }}
-          className="text-center mt-16"
-        >
-          <div className="bg-white rounded-2xl shadow-soft p-8 max-w-2xl mx-auto">
+        <div className="text-center mt-16">
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Sẵn sàng bắt đầu?
             </h3>
@@ -130,19 +113,19 @@ export default function HowItWorksSection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="/register"
-                className="btn btn-primary btn-lg"
+                className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500"
               >
                 Đăng ký ngay
               </a>
               <a
                 href="/technologies"
-                className="btn btn-outline btn-lg"
+                className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-500"
               >
                 Khám phá công nghệ
               </a>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

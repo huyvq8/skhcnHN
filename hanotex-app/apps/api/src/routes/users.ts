@@ -385,3 +385,4 @@ router.post('/:id/deactivate', authenticateToken, requireRole(['ADMIN']), async 
 });
 
 export default router;
+

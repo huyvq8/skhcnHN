@@ -14,6 +14,15 @@ const dbConfig: PoolConfig = {
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 };
 
+// Log database configuration
+console.log('🔧 Database config:', {
+  host: dbConfig.host,
+  port: dbConfig.port,
+  database: dbConfig.database,
+  user: dbConfig.user,
+  password: dbConfig.password ? '***' : 'undefined'
+});
+
 // Create PostgreSQL connection pool
 export const pool = new Pool(dbConfig);
 
@@ -98,3 +107,4 @@ export const transaction = async (callback: (client: any) => Promise<any>): Prom
     client.release();
   }
 };
+

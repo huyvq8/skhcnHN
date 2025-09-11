@@ -118,3 +118,4 @@ SELECT
     COUNT(*)
 FROM auctions 
 WHERE status = 'SCHEDULED';
+

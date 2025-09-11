@@ -1,5 +1,5 @@
 import express from 'express';
-import { query } from '../config/database';
+import { query, transaction } from '../config/database';
 import { authenticateToken } from '../middleware/auth';
 import { validate, validateQuery, schemas } from '../middleware/validation';
 import { ApiResponse } from '../types';
@@ -10,7 +10,9 @@ const router = express.Router();
 router.get('/', validateQuery(schemas.pagination), async (req, res) => {
   try {
     const { page = 1, limit = 20, sort = 'start_time', order = 'ASC' } = req.query;
-    const offset = (page - 1) * limit;
+    const pageNum = parseInt(page as string) || 1;
+    const limitNum = parseInt(limit as string) || 20;
+    const offset = (pageNum - 1) * limitNum;
 
     // Get total count
     const countResult = await query(
@@ -258,7 +260,7 @@ router.post('/:id/bid', authenticateToken, validate(schemas.bid), async (req, re
     }
 
     // Start transaction
-    const result = await query(async (client) => {
+    const result = await transaction(async (client) => {
       // Create bid
       const bidResult = await client.query(`
         INSERT INTO bids (auction_id, bidder_id, bid_amount, bid_time)
@@ -297,7 +299,9 @@ router.get('/:id/bids', async (req, res) => {
   try {
     const { id } = req.params;
     const { page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
+    const pageNum = parseInt(page as string) || 1;
+    const limitNum = parseInt(limit as string) || 20;
+    const offset = (pageNum - 1) * limitNum;
 
     // Check if auction exists
     const auctionResult = await query(
@@ -356,3 +360,4 @@ router.get('/:id/bids', async (req, res) => {
 });
 
 export default router;
+

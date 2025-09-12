@@ -34,6 +34,33 @@ services:
       - postgres
     restart: unless-stopped
 
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: hanotex-api
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=hanotex-postgres
+      - DB_PORT=5432
+      - DB_NAME=hanotex
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - REDIS_HOST=hanotex-redis
+      - REDIS_PORT=6379
+      - PORT=3001
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - CORS_ORIGIN=http://localhost:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:

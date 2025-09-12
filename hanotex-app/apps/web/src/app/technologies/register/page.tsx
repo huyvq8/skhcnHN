@@ -361,8 +361,8 @@ export default function RegisterTechnologyPage() {
           classification: {
             ...prev.classification,
             field: extractedData.field || prev.classification.field,
-            category: extractedData.category || prev.classification.category,
-            subcategory: extractedData.subcategory || prev.classification.subcategory
+            industry: extractedData.industry || prev.classification.industry,
+            specialty: extractedData.specialty || prev.classification.specialty
           }
         }));
 
@@ -863,11 +863,11 @@ export default function RegisterTechnologyPage() {
                                 {ocrResult.extractedData.field && (
                                   <li>Lĩnh vực: {ocrResult.extractedData.field}</li>
                                 )}
-                                {ocrResult.extractedData.category && (
-                                  <li>Danh mục: {ocrResult.extractedData.category}</li>
+                                {ocrResult.extractedData.industry && (
+                                  <li>Ngành: {ocrResult.extractedData.industry}</li>
                                 )}
-                                {ocrResult.extractedData.subcategory && (
-                                  <li>Chuyên ngành: {ocrResult.extractedData.subcategory}</li>
+                                {ocrResult.extractedData.specialty && (
+                                  <li>Chuyên ngành: {ocrResult.extractedData.specialty}</li>
                                 )}
                                 {ocrResult.extractedData.trlSuggestion && (
                                   <li>TRL gợi ý: {ocrResult.extractedData.trlSuggestion}</li>

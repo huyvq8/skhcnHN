@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
       extractedData = {
         title: 'Hệ thống nhận dạng hình ảnh thông minh',
         field: 'SCI_ENG',
-        category: 'EEICT',
-        subcategory: 'Xử lý hình ảnh',
+        industry: 'EEICT',
+        specialty: 'Xử lý hình ảnh',
         trlSuggestion: '6',
         confidence: 0.85
       };
@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
       extractedData = {
         title: 'Công nghệ xử lý dữ liệu phân tán',
         field: 'SCI_ENG',
-        category: 'EEICT',
-        subcategory: 'Hệ thống phân tán',
+        industry: 'EEICT',
+        specialty: 'Hệ thống phân tán',
         trlSuggestion: '7',
         confidence: 0.92
       };
@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
       extractedData = {
         title: 'Phần mềm quản lý tài nguyên doanh nghiệp',
         field: 'SCI_ENG',
-        category: 'EEICT',
-        subcategory: 'Phần mềm hệ thống',
+        industry: 'EEICT',
+        specialty: 'Phần mềm hệ thống',
         trlSuggestion: '8',
         confidence: 0.88
       };
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
       extractedData = {
         title: 'Công nghệ tiên tiến',
         field: 'SCI_ENG',
-        category: 'MECH',
-        subcategory: 'Cơ khí chính xác',
+        industry: 'MECH',
+        specialty: 'Cơ khí chính xác',
         trlSuggestion: '5',
         confidence: 0.75
       };

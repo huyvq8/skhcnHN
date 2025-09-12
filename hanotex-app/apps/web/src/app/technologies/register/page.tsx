@@ -21,6 +21,13 @@ export default function RegisterTechnologyPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showOptionalFields, setShowOptionalFields] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    investmentTransfer: false,
+    visibilityNDA: false,
+    pricing: false
+  });
+
+  const [selectedIPType, setSelectedIPType] = useState('');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -299,6 +306,25 @@ export default function RegisterTechnologyPage() {
         localCertificationFiles: prev.legalTerritory.localCertificationFiles.filter((_, i) => i !== index)
       }
     }));
+  };
+
+  const toggleSection = (sectionName: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionName]: !prev[sectionName]
+    }));
+  };
+
+  const getIPTypeDescription = (ipType: string) => {
+    const descriptions: { [key: string]: string } = {
+      'PATENT': 'Giải pháp kỹ thuật mới, sáng tạo, áp dụng công nghiệp. Bảo hộ 20 năm.',
+      'UTILITY_MODEL': 'Giải pháp kỹ thuật mới so với hiện tại. Bảo hộ 10 năm.',
+      'INDUSTRIAL_DESIGN': 'Hình dáng bên ngoài sản phẩm. Bảo hộ 15 năm.',
+      'TRADEMARK': 'Dấu hiệu phân biệt hàng hóa/dịch vụ. Bảo hộ 10 năm, có thể gia hạn.',
+      'COPYRIGHT': 'Bảo hộ mã nguồn, thuật toán. Bảo hộ suốt đời + 50 năm.',
+      'TRADE_SECRET': 'Thông tin có giá trị thương mại, bảo mật. Không có thời hạn.'
+    };
+    return descriptions[ipType] || '';
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -630,20 +656,6 @@ export default function RegisterTechnologyPage() {
                         placeholder="Nguyễn Văn B"
                       />
                     </div>
-                    <div>
-                      <label htmlFor="submitter.productionCapacity" className="block text-sm font-medium text-gray-700 mb-1">
-                        Năng lực sản xuất
-                      </label>
-                      <input
-                        type="text"
-                        id="submitter.productionCapacity"
-                        name="submitter.productionCapacity"
-                        value={formData.submitter.productionCapacity || ''}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Nhà xưởng, công suất, nhân sự R&D"
-                      />
-                    </div>
                   </>
                 )}
 
@@ -705,20 +717,6 @@ export default function RegisterTechnologyPage() {
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="VD: KC.01.xx.yyyy"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="submitter.acceptanceReport" className="block text-sm font-medium text-gray-700 mb-1">
-                        Báo cáo nghiệm thu
-                      </label>
-                      <input
-                        type="text"
-                        id="submitter.acceptanceReport"
-                        name="submitter.acceptanceReport"
-                        value={formData.submitter.acceptanceReport || ''}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Link hoặc ghi chú"
                       />
                     </div>
                     <div>
@@ -1115,7 +1113,6 @@ export default function RegisterTechnologyPage() {
                       <option value="INDIVIDUAL">Cá nhân</option>
                       <option value="COMPANY">Doanh nghiệp</option>
                       <option value="RESEARCH_INSTITUTION">Viện/Trường</option>
-                      <option value="FULL_OWNERSHIP">Sở hữu toàn phần</option>
                     </select>
                   </div>
                   <div>
@@ -1175,24 +1172,29 @@ export default function RegisterTechnologyPage() {
             </div>
             <div className="p-6 space-y-4">
               {formData.ipDetails.map((ip, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-gray-200 rounded-lg">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Loại hình IP
-                    </label>
-                    <select
-                      value={ip.ipType}
-                      onChange={(e) => updateIPDetail(index, 'ipType', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="PATENT">Sáng chế (Patent)</option>
-                      <option value="UTILITY_MODEL">Giải pháp hữu ích</option>
-                      <option value="INDUSTRIAL_DESIGN">Kiểu dáng công nghiệp</option>
-                      <option value="TRADEMARK">Nhãn hiệu</option>
-                      <option value="COPYRIGHT">Quyền tác giả</option>
-                      <option value="TRADE_SECRET">Bí mật kinh doanh</option>
-                    </select>
-                  </div>
+                <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Loại hình IP
+                      </label>
+                      <select
+                        value={ip.ipType}
+                        onChange={(e) => {
+                          updateIPDetail(index, 'ipType', e.target.value);
+                          setSelectedIPType(e.target.value);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Chọn loại hình IP</option>
+                        <option value="PATENT">Sáng chế (Patent)</option>
+                        <option value="UTILITY_MODEL">Giải pháp hữu ích</option>
+                        <option value="INDUSTRIAL_DESIGN">Kiểu dáng công nghiệp</option>
+                        <option value="TRADEMARK">Nhãn hiệu</option>
+                        <option value="COPYRIGHT">Quyền tác giả</option>
+                        <option value="TRADE_SECRET">Bí mật kinh doanh</option>
+                      </select>
+                    </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Số đơn/Số bằng
@@ -1221,16 +1223,24 @@ export default function RegisterTechnologyPage() {
                       <option value="REJECTED">Bị từ chối</option>
                     </select>
                   </div>
-                  <div className="flex items-end">
-                    <button
-                      type="button"
-                      onClick={() => removeIPDetail(index)}
-                      className="flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Xóa
-                    </button>
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={() => removeIPDetail(index)}
+                        className="flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Xóa
+                      </button>
+                    </div>
                   </div>
+                  
+                  {/* Mô tả IP - nằm dưới grid */}
+                  {ip.ipType && (
+                    <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                      <strong>💡</strong> {getIPTypeDescription(ip.ipType)}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -1250,22 +1260,27 @@ export default function RegisterTechnologyPage() {
                   </label>
                   <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
                     {[
-                      'VN (Cục SHTT)',
-                      'PCT (đơn quốc tế)',
-                      'EP/EPO (Châu Âu)',
-                      'US/USPTO (Hoa Kỳ)',
-                      'CN/CNIPA (Trung Quốc)',
-                      'JP/JPO (Nhật Bản)',
-                      'WO khác...'
+                      { value: 'VN (Cục SHTT)', tooltip: 'Bảo hộ trong lãnh thổ Việt Nam' },
+                      { value: 'PCT (đơn quốc tế)', tooltip: 'Đơn quốc tế, chưa phải bằng sáng chế' },
+                      { value: 'EP/EPO (Châu Âu)', tooltip: 'Văn phòng sáng chế châu Âu' },
+                      { value: 'US/USPTO (Hoa Kỳ)', tooltip: 'Cơ quan sáng chế và nhãn hiệu Hoa Kỳ' },
+                      { value: 'CN/CNIPA (Trung Quốc)', tooltip: 'Cơ quan sở hữu trí tuệ Trung Quốc' },
+                      { value: 'JP/JPO (Nhật Bản)', tooltip: 'Cơ quan sáng chế Nhật Bản' },
+                      { value: 'WO khác...', tooltip: 'Các tổ chức quốc tế khác' }
                     ].map((territory) => (
-                      <label key={territory} className="flex items-center">
+                      <label key={territory.value} className="flex items-center group">
                         <input
                           type="checkbox"
-                          checked={formData.legalTerritory.protectionTerritories.includes(territory)}
-                          onChange={(e) => handleTerritoryChange(territory, e.target.checked)}
+                          checked={formData.legalTerritory.protectionTerritories.includes(territory.value)}
+                          onChange={(e) => handleTerritoryChange(territory.value, e.target.checked)}
                           className="mr-2"
                         />
-                        <span className="text-sm text-gray-700">{territory}</span>
+                        <span 
+                          className="text-sm text-gray-700 cursor-help"
+                          title={territory.tooltip}
+                        >
+                          {territory.value}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -1281,22 +1296,27 @@ export default function RegisterTechnologyPage() {
                   </label>
                   <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
                     {[
-                      'CE Marking (EU)',
-                      'FDA Approval (US)',
-                      'ISO 9001 (QMS)',
-                      'ISO/IEC 27001 (ISMS)',
-                      'ISO 13485 (Thiết bị y tế)',
-                      'IEC/EN (thiết bị điện – điện tử)',
-                      'Khác...'
+                      { value: 'CE Marking (EU)', tooltip: 'Chứng nhận tuân thủ quy định châu Âu' },
+                      { value: 'FDA Approval (US)', tooltip: 'Phê duyệt của Cơ quan Quản lý Thực phẩm và Dược phẩm Mỹ' },
+                      { value: 'ISO 9001 (QMS)', tooltip: 'Hệ thống quản lý chất lượng quốc tế' },
+                      { value: 'ISO/IEC 27001 (ISMS)', tooltip: 'Hệ thống quản lý an ninh thông tin' },
+                      { value: 'ISO 13485 (Thiết bị y tế)', tooltip: 'Hệ thống quản lý chất lượng thiết bị y tế' },
+                      { value: 'IEC/EN (thiết bị điện – điện tử)', tooltip: 'Tiêu chuẩn quốc tế về thiết bị điện tử' },
+                      { value: 'Khác...', tooltip: 'Các chứng nhận tiêu chuẩn khác' }
                     ].map((certification) => (
-                      <label key={certification} className="flex items-center">
+                      <label key={certification.value} className="flex items-center group">
                         <input
                           type="checkbox"
-                          checked={formData.legalTerritory.certifications.includes(certification)}
-                          onChange={(e) => handleCertificationChange(certification, e.target.checked)}
+                          checked={formData.legalTerritory.certifications.includes(certification.value)}
+                          onChange={(e) => handleCertificationChange(certification.value, e.target.checked)}
                           className="mr-2"
                         />
-                        <span className="text-sm text-gray-700">{certification}</span>
+                        <span 
+                          className="text-sm text-gray-700 cursor-help"
+                          title={certification.tooltip}
+                        >
+                          {certification.value}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -1351,27 +1371,48 @@ export default function RegisterTechnologyPage() {
                 </div>
               </div>
 
-              {/* Gợi ý khó khăn thường gặp */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-yellow-900 mb-2">
-                  <strong>Khó khăn thường gặp:</strong>
+              {/* Hướng dẫn và gợi ý */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-blue-900 mb-3">
+                  <strong>💡 Hướng dẫn chọn lựa:</strong>
                 </h4>
-                <p className="text-xs text-yellow-800 mb-2">
-                  (1) Phân biệt PCT vs bằng đã cấp; (2) Phân biệt CE/FDA/ISO/IEC; (3) Tìm đúng mã/tiêu chuẩn.
-                </p>
-                <p className="text-xs text-yellow-700">
-                  <em>Gợi ý UX:</em> thanh tìm kiếm có autocomplete + tooltip giải thích ngắn; bảng so sánh nhanh các tiêu chuẩn.
-                </p>
+                <div className="space-y-2 text-xs text-blue-800">
+                  <div>
+                    <strong>Phạm vi bảo hộ:</strong> VN (trong nước), PCT (quốc tế), EP/US/CN/JP (từng khu vực)
+                  </div>
+                  <div>
+                    <strong>Chứng nhận tiêu chuẩn:</strong> CE (Châu Âu), FDA (Mỹ), ISO (quốc tế), IEC (điện tử)
+                  </div>
+                  <div className="text-blue-700 italic">
+                    💡 Tip: Hover vào các tùy chọn để xem mô tả chi tiết
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* 6. Mong muốn đầu tư & Hình thức chuyển giao */}
           <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">6. Mong muốn đầu tư & Hình thức chuyển giao <span className="text-sm font-normal text-gray-500">(Tùy chọn)</span></h2>
+            <div 
+              className="px-6 py-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+              onClick={() => toggleSection('investmentTransfer')}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">6. Mong muốn đầu tư & Hình thức chuyển giao <span className="text-sm font-normal text-gray-500">(Tùy chọn)</span></h2>
+                <div className="flex items-center">
+                  {!expandedSections.investmentTransfer && (
+                    <span className="text-sm text-gray-500 mr-2">Click để mở rộng</span>
+                  )}
+                  <div className={`transform transition-transform ${expandedSections.investmentTransfer ? 'rotate-180' : ''}`}>
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="p-6 space-y-4">
+            {expandedSections.investmentTransfer && (
+              <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="investmentTransfer.investmentStage" className="block text-sm font-medium text-gray-700 mb-1">
@@ -1416,11 +1457,18 @@ export default function RegisterTechnologyPage() {
                   Phương án thương mại hóa (chọn nhiều)
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {['B2B', 'B2C', 'Licensing', 'OEM/ODM', 'Joint Venture', 'Spin-off'].map((method) => (
-                    <label key={method} className="flex items-center">
+                  {[
+                    { value: 'B2B', tooltip: 'Bán cho doanh nghiệp khác' },
+                    { value: 'B2C', tooltip: 'Bán trực tiếp cho người tiêu dùng' },
+                    { value: 'Licensing', tooltip: 'Cấp phép sử dụng công nghệ' },
+                    { value: 'OEM/ODM', tooltip: 'Sản xuất theo đơn đặt hàng' },
+                    { value: 'Joint Venture', tooltip: 'Liên doanh với đối tác' },
+                    { value: 'Spin-off', tooltip: 'Tách ra thành công ty riêng' }
+                  ].map((method) => (
+                    <label key={method.value} className="flex items-center group">
                       <input
                         type="checkbox"
-                        checked={formData.investmentTransfer.commercializationMethods.includes(method)}
+                        checked={formData.investmentTransfer.commercializationMethods.includes(method.value)}
                         onChange={(e) => {
                           const methods = formData.investmentTransfer.commercializationMethods;
                           if (e.target.checked) {
@@ -1428,7 +1476,7 @@ export default function RegisterTechnologyPage() {
                               ...prev,
                               investmentTransfer: {
                                 ...prev.investmentTransfer,
-                                commercializationMethods: [...methods, method]
+                                commercializationMethods: [...methods, method.value]
                               }
                             }));
                           } else {
@@ -1436,14 +1484,19 @@ export default function RegisterTechnologyPage() {
                               ...prev,
                               investmentTransfer: {
                                 ...prev.investmentTransfer,
-                                commercializationMethods: methods.filter(m => m !== method)
+                                commercializationMethods: methods.filter(m => m !== method.value)
                               }
                             }));
                           }
                         }}
                         className="mr-2"
                       />
-                      <span className="text-sm text-gray-700">{method}</span>
+                      <span 
+                        className="text-sm text-gray-700 cursor-help"
+                        title={method.tooltip}
+                      >
+                        {method.value}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -1454,11 +1507,18 @@ export default function RegisterTechnologyPage() {
                   Hình thức chuyển quyền (chọn nhiều)
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {['Chuyển nhượng toàn bộ', 'Chuyển nhượng một phần', 'License độc quyền', 'License không độc quyền', 'Sub-license', 'Kèm dịch vụ kỹ thuật'].map((method) => (
-                    <label key={method} className="flex items-center">
+                  {[
+                    { value: 'Chuyển nhượng toàn bộ', tooltip: 'Bán hoàn toàn quyền sở hữu' },
+                    { value: 'Chuyển nhượng một phần', tooltip: 'Bán một phần quyền sở hữu' },
+                    { value: 'License độc quyền', tooltip: 'Cấp phép độc quyền cho một bên' },
+                    { value: 'License không độc quyền', tooltip: 'Cấp phép cho nhiều bên' },
+                    { value: 'Sub-license', tooltip: 'Cho phép bên được cấp phép cấp lại' },
+                    { value: 'Kèm dịch vụ kỹ thuật', tooltip: 'Bao gồm hỗ trợ kỹ thuật, training' }
+                  ].map((method) => (
+                    <label key={method.value} className="flex items-center group">
                       <input
                         type="checkbox"
-                        checked={formData.investmentTransfer.transferMethods.includes(method)}
+                        checked={formData.investmentTransfer.transferMethods.includes(method.value)}
                         onChange={(e) => {
                           const methods = formData.investmentTransfer.transferMethods;
                           if (e.target.checked) {
@@ -1466,7 +1526,7 @@ export default function RegisterTechnologyPage() {
                               ...prev,
                               investmentTransfer: {
                                 ...prev.investmentTransfer,
-                                transferMethods: [...methods, method]
+                                transferMethods: [...methods, method.value]
                               }
                             }));
                           } else {
@@ -1474,14 +1534,19 @@ export default function RegisterTechnologyPage() {
                               ...prev,
                               investmentTransfer: {
                                 ...prev.investmentTransfer,
-                                transferMethods: methods.filter(m => m !== method)
+                                transferMethods: methods.filter(m => m !== method.value)
                               }
                             }));
                           }
                         }}
                         className="mr-2"
                       />
-                      <span className="text-sm text-gray-700">{method}</span>
+                      <span 
+                        className="text-sm text-gray-700 cursor-help"
+                        title={method.tooltip}
+                      >
+                        {method.value}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -1517,107 +1582,32 @@ export default function RegisterTechnologyPage() {
                   />
                 </div>
               </div>
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* 7. Chính sách hiển thị & NDA */}
+          {/* 7. Định giá & Giá mong muốn */}
           <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">7. Chính sách hiển thị & NDA <span className="text-sm font-normal text-gray-500">(Tùy chọn)</span></h2>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label htmlFor="visibilityMode" className="block text-sm font-medium text-gray-700 mb-1">
-                  Chế độ hiển thị
-                </label>
-                <select
-                  id="visibilityMode"
-                  name="visibilityMode"
-                  value={formData.visibilityMode}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="PUBLIC_SUMMARY">Tóm tắt công khai + Chi tiết sau NDA</option>
-                  <option value="PUBLIC_FULL">Hoàn toàn công khai</option>
-                  <option value="PRIVATE">Riêng tư (chỉ theo lời mời)</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Trường công khai</h4>
-                  <div className="space-y-2">
-                    {[
-                      { field: 'title', label: 'Tên công nghệ/sản phẩm' },
-                      { field: 'publicSummary', label: 'Mô tả ngắn (2-3 câu)' },
-                      { field: 'classification', label: 'Lĩnh vực/Ngành/Chuyên ngành' },
-                      { field: 'trlLevel', label: 'TRL' },
-                      { field: 'owners', label: 'Chủ sở hữu' },
-                      { field: 'ipDetails', label: 'Loại chứng nhận (không hiển thị số)' }
-                    ].map((item) => (
-                      <label key={item.field} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          defaultChecked
-                          className="mr-2"
-                        />
-                        <span className="text-sm text-gray-700">{item.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Không công khai: số bằng, tài liệu chi tiết, dữ liệu tài chính.
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Trường ẩn sau NDA</h4>
-                  <div className="space-y-2">
-                    {[
-                      { field: 'confidentialDetail', label: 'Mô tả chi tiết kỹ thuật' },
-                      { field: 'documents', label: 'Tài liệu minh chứng (PDF/Ảnh/Video)' },
-                      { field: 'ipNumbers', label: 'Số đơn/Số bằng' },
-                      { field: 'financials', label: 'Dữ liệu tài chính/kiểm thử chi tiết' },
-                      { field: 'contacts', label: 'Liên hệ trực tiếp nhóm R&D' }
-                    ].map((item) => (
-                      <label key={item.field} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          defaultChecked
-                          className="mr-2"
-                        />
-                        <span className="text-sm text-gray-700">{item.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <div className="mt-3">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        defaultChecked
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700">Watermark tài liệu</span>
-                    </label>
+            <div 
+              className="px-6 py-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+              onClick={() => toggleSection('pricing')}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">7. Định giá & Giá mong muốn <span className="text-sm font-normal text-gray-500">(Tùy chọn)</span></h2>
+                <div className="flex items-center">
+                  {!expandedSections.pricing && (
+                    <span className="text-sm text-gray-500 mr-2">Click để mở rộng</span>
+                  )}
+                  <div className={`transform transition-transform ${expandedSections.pricing ? 'rotate-180' : ''}`}>
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
                 </div>
               </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-blue-900 mb-2">🔍 Xem trước phần CÔNG KHAI:</h4>
-                <div className="text-sm text-blue-700">
-                  Tên, mô tả ngắn, taxonomy, TRL, ứng dụng (theo lựa chọn trường công khai).
-                </div>
-              </div>
             </div>
-          </div>
-
-          {/* 8. Định giá & Giá mong muốn */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">8. Định giá & Giá mong muốn <span className="text-sm font-normal text-gray-500">(Tùy chọn)</span></h2>
-            </div>
-            <div className="p-6 space-y-4">
+            {expandedSections.pricing && (
+              <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Chọn hình thức
@@ -1827,7 +1817,117 @@ export default function RegisterTechnologyPage() {
                   </div>
                 )}
               </div>
+              </div>
+            )}
+          </div>
+
+          {/* 8. Chính sách hiển thị & NDA */}
+          <div className="bg-white shadow rounded-lg">
+            <div 
+              className="px-6 py-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+              onClick={() => toggleSection('visibilityNDA')}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">8. Chính sách hiển thị & NDA <span className="text-sm font-normal text-gray-500">(Tùy chọn)</span></h2>
+                <div className="flex items-center">
+                  {!expandedSections.visibilityNDA && (
+                    <span className="text-sm text-gray-500 mr-2">Click để mở rộng</span>
+                  )}
+                  <div className={`transform transition-transform ${expandedSections.visibilityNDA ? 'rotate-180' : ''}`}>
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
+            {expandedSections.visibilityNDA && (
+              <div className="p-6 space-y-4">
+              <div>
+                <label htmlFor="visibilityMode" className="block text-sm font-medium text-gray-700 mb-1">
+                  Chế độ hiển thị
+                </label>
+                <select
+                  id="visibilityMode"
+                  name="visibilityMode"
+                  value={formData.visibilityMode}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="PUBLIC_SUMMARY">Tóm tắt công khai + Chi tiết sau NDA</option>
+                  <option value="PUBLIC_FULL">Hoàn toàn công khai</option>
+                  <option value="PRIVATE">Riêng tư (chỉ theo lời mời)</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">Trường công khai</h4>
+                  <div className="space-y-2">
+                    {[
+                      { field: 'title', label: 'Tên công nghệ/sản phẩm' },
+                      { field: 'publicSummary', label: 'Mô tả ngắn (2-3 câu)' },
+                      { field: 'classification', label: 'Lĩnh vực/Ngành/Chuyên ngành' },
+                      { field: 'trlLevel', label: 'TRL' },
+                      { field: 'owners', label: 'Chủ sở hữu' },
+                      { field: 'ipDetails', label: 'Loại chứng nhận (không hiển thị số)' }
+                    ].map((item) => (
+                      <label key={item.field} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          defaultChecked
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-700">{item.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Không công khai: số bằng, tài liệu chi tiết, dữ liệu tài chính.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">Trường ẩn sau NDA</h4>
+                  <div className="space-y-2">
+                    {[
+                      { field: 'confidentialDetail', label: 'Mô tả chi tiết kỹ thuật' },
+                      { field: 'documents', label: 'Tài liệu minh chứng (PDF/Ảnh/Video)' },
+                      { field: 'ipNumbers', label: 'Số đơn/Số bằng' },
+                      { field: 'financials', label: 'Dữ liệu tài chính/kiểm thử chi tiết' },
+                      { field: 'contacts', label: 'Liên hệ trực tiếp nhóm R&D' }
+                    ].map((item) => (
+                      <label key={item.field} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          defaultChecked
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-700">{item.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="mt-3">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-gray-700">Watermark tài liệu</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-blue-900 mb-2">🔍 Xem trước phần CÔNG KHAI:</h4>
+                <div className="text-sm text-blue-700">
+                  Tên, mô tả ngắn, taxonomy, TRL, ứng dụng (theo lựa chọn trường công khai).
+                </div>
+              </div>
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}

@@ -28,6 +28,8 @@ export default function RegisterTechnologyPage() {
   });
 
   const [selectedIPType, setSelectedIPType] = useState('');
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrResult, setOcrResult] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -327,6 +329,77 @@ export default function RegisterTechnologyPage() {
     return descriptions[ipType] || '';
   };
 
+  const processOCR = async (file: File) => {
+    setOcrLoading(true);
+    setOcrResult(null);
+    try {
+      // Tạo FormData để upload file
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Gọi API OCR
+      const response = await fetch('/api/ocr/process', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('OCR processing failed');
+      }
+
+      const result = await response.json();
+      setOcrResult(result);
+
+      // Tự động điền thông tin vào form
+      if (result.success && result.extractedData) {
+        const { extractedData } = result;
+        
+        setFormData(prev => ({
+          ...prev,
+          title: extractedData.title || prev.title,
+          trlLevel: extractedData.trlSuggestion || prev.trlLevel,
+          classification: {
+            ...prev.classification,
+            field: extractedData.field || prev.classification.field,
+            category: extractedData.category || prev.classification.category,
+            subcategory: extractedData.subcategory || prev.classification.subcategory
+          }
+        }));
+
+        setSuccess(`OCR đã xử lý thành công! Đã tự động điền thông tin từ tài liệu.`);
+      }
+    } catch (error) {
+      console.error('OCR Error:', error);
+      setError('Không thể xử lý OCR. Vui lòng thử lại.');
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
+  const suggestTRLFromContent = (content: string) => {
+    const lowerContent = content.toLowerCase();
+    
+    // TRL 1-3: Nguyên lý, khái niệm, bằng chứng thực nghiệm
+    if (lowerContent.includes('nguyên lý') || lowerContent.includes('khái niệm') || 
+        lowerContent.includes('lý thuyết') || lowerContent.includes('giả thuyết')) {
+      return '1';
+    }
+    
+    // TRL 4-6: Mẫu thử, nguyên mẫu
+    if (lowerContent.includes('mẫu thử') || lowerContent.includes('nguyên mẫu') || 
+        lowerContent.includes('prototype') || lowerContent.includes('demo')) {
+      return '5';
+    }
+    
+    // TRL 7-9: Pilot, thương mại hóa
+    if (lowerContent.includes('pilot') || lowerContent.includes('thương mại') || 
+        lowerContent.includes('sản xuất') || lowerContent.includes('thị trường')) {
+      return '8';
+    }
+    
+    return '3'; // Default
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
@@ -352,8 +425,10 @@ export default function RegisterTechnologyPage() {
         documents: [...prev.documents, newDocument]
       }));
 
-      // Giả lập OCR để tự động điền thông tin
-      await simulateOCR(file);
+      // Xử lý OCR cho file đầu tiên
+      if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
+        await processOCR(file);
+      }
     }
   };
 
@@ -364,43 +439,6 @@ export default function RegisterTechnologyPage() {
     }));
   };
 
-  const simulateOCR = async (file: File) => {
-    // Giả lập quá trình OCR
-    setTimeout(() => {
-      // Giả lập kết quả OCR dựa trên tên file
-      const fileName = file.name.toLowerCase();
-      
-      if (fileName.includes('patent') || fileName.includes('bằng')) {
-        setFormData(prev => ({
-          ...prev,
-          classification: {
-            ...prev.classification,
-            field: 'SCI_ENG',
-            industry: 'MECH'
-          }
-        }));
-      } else if (fileName.includes('software') || fileName.includes('phần mềm')) {
-        setFormData(prev => ({
-          ...prev,
-          classification: {
-            ...prev.classification,
-            field: 'SCI_ENG',
-            industry: 'EEICT',
-            specialty: 'SYSTEM_SOFTWARE'
-          }
-        }));
-      } else if (fileName.includes('ai') || fileName.includes('trí tuệ')) {
-        setFormData(prev => ({
-          ...prev,
-          classification: {
-            ...prev.classification,
-            field: 'SCI_INT',
-            industry: 'AI'
-          }
-        }));
-      }
-    }, 1000);
-  };
 
   const getTRLSuggestions = (trlLevel: string) => {
     const suggestions: Record<string, { title: string; fields: string[] }> = {
@@ -787,6 +825,64 @@ export default function RegisterTechnologyPage() {
                     onChange={handleFileUpload}
                   />
                 </div>
+
+                {/* OCR Loading State */}
+                {ocrLoading && (
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-800">Đang xử lý OCR...</p>
+                        <p className="text-xs text-blue-600">Vui lòng chờ trong giây lát</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* OCR Result */}
+                {ocrResult && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3 flex-1">
+                        <h4 className="text-sm font-medium text-green-800">OCR xử lý thành công!</h4>
+                        <div className="mt-2 text-sm text-green-700">
+                          <p><strong>File:</strong> {ocrResult.fileInfo?.name}</p>
+                          <p><strong>Thời gian xử lý:</strong> {ocrResult.processingTime}</p>
+                          {ocrResult.extractedData && (
+                            <div className="mt-2">
+                              <p><strong>Thông tin đã trích xuất:</strong></p>
+                              <ul className="list-disc list-inside mt-1 space-y-1">
+                                {ocrResult.extractedData.title && (
+                                  <li>Tên: {ocrResult.extractedData.title}</li>
+                                )}
+                                {ocrResult.extractedData.field && (
+                                  <li>Lĩnh vực: {ocrResult.extractedData.field}</li>
+                                )}
+                                {ocrResult.extractedData.category && (
+                                  <li>Danh mục: {ocrResult.extractedData.category}</li>
+                                )}
+                                {ocrResult.extractedData.subcategory && (
+                                  <li>Chuyên ngành: {ocrResult.extractedData.subcategory}</li>
+                                )}
+                                {ocrResult.extractedData.trlSuggestion && (
+                                  <li>TRL gợi ý: {ocrResult.extractedData.trlSuggestion}</li>
+                                )}
+                                {ocrResult.extractedData.confidence && (
+                                  <li>Độ tin cậy: {Math.round(ocrResult.extractedData.confidence * 100)}%</li>
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {formData.documents.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {formData.documents.map((doc, index) => (

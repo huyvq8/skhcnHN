@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Target, Plus, Edit, Trash2, Eye, MoreVertical } from 'lucide-react';
 
 export default function MyDemandsPage() {
+  const router = useRouter();
   const [demands] = useState([
     {
       id: 1,
@@ -68,7 +70,10 @@ export default function MyDemandsPage() {
                 Quản lý và theo dõi các nhu cầu công nghệ bạn đã đăng
               </p>
             </div>
-            <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+            <button 
+              onClick={() => router.push('/demands/register')}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center"
+            >
               <Plus className="h-5 w-5 mr-2" />
               Đăng nhu cầu mới
             </button>
@@ -173,13 +178,27 @@ export default function MyDemandsPage() {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                    <button 
+                      onClick={() => router.push(`/demands/${demand.id}`)}
+                      className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                    >
                       <Eye className="h-5 w-5" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-green-600 transition-colors">
+                    <button 
+                      onClick={() => router.push(`/demands/${demand.id}/edit`)}
+                      className="p-2 text-gray-400 hover:text-green-600 transition-colors"
+                    >
                       <Edit className="h-5 w-5" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                    <button 
+                      onClick={() => {
+                        if (confirm('Bạn có chắc chắn muốn xóa nhu cầu này?')) {
+                          // TODO: Implement delete functionality
+                          console.log('Delete demand:', demand.id);
+                        }
+                      }}
+                      className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                    >
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
@@ -197,7 +216,10 @@ export default function MyDemandsPage() {
               <p className="text-gray-600 mb-6">
                 Bắt đầu đăng nhu cầu đầu tiên của bạn
               </p>
-              <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center mx-auto">
+              <button 
+                onClick={() => router.push('/demands/register')}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center mx-auto"
+              >
                 <Plus className="h-5 w-5 mr-2" />
                 Đăng nhu cầu mới
               </button>

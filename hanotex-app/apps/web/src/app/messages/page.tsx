@@ -5,6 +5,22 @@ import { MessageSquare, Send, Search, MoreVertical, Star, Reply } from 'lucide-r
 
 export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState(0);
+  const [newMessage, setNewMessage] = useState('');
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      // TODO: Implement send message functionality
+      console.log('Sending message:', newMessage);
+      setNewMessage('');
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   const conversations = [
     {
@@ -186,10 +202,16 @@ export default function MessagesPage() {
                   <div className="flex items-center space-x-3">
                     <input
                       type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
                       placeholder="Nhập tin nhắn..."
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
+                    <button 
+                      onClick={handleSendMessage}
+                      className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
+                    >
                       <Send className="h-5 w-5" />
                     </button>
                   </div>

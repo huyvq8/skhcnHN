@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuthStore } from '@/store/auth';
+import { useAuthActions } from '@/store/auth';
 
 type UserType = 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION';
 
@@ -36,7 +36,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { register } = useAuthStore();
+  const { register } = useAuthActions();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {

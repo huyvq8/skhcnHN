@@ -107,14 +107,20 @@ export default function MainFeaturesSection() {
               Tham gia ngay để trải nghiệm đầy đủ các tính năng và dịch vụ của HANOTEX
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
+              <a 
+                href="/auth/register"
+                className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+              >
                 Đăng ký tài khoản
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </button>
-              <button className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 focus:ring-blue-500">
+              </a>
+              <a 
+                href="/technologies"
+                className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 focus:ring-blue-500"
+              >
                 Xem demo
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </button>
+              </a>
             </div>
           </div>
         </div>

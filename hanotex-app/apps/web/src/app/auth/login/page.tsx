@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuthStore } from '@/store/auth';
+import { useAuthActions } from '@/store/auth';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { login } = useAuthStore();
+  const { login } = useAuthActions();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {

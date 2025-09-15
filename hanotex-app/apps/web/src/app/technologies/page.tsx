@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Metadata } from 'next';
 import { 
   Search, 
@@ -22,6 +22,7 @@ import apiClient from '@/lib/api';
 
 export default function TechnologiesPage() {
   const [technologies, setTechnologies] = useState<Technology[]>([]);
+  const [categories, setCategories] = useState<Array<{id: string, name: string, code: string}>>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
@@ -34,13 +35,40 @@ export default function TechnologiesPage() {
   });
   
   const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Initialize search query from URL params
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
+
+  // Load categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setCategories(data.data);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchTechnologies = async () => {
       try {
         setLoading(true);
+        // Remove search from params since backend doesn't support it
         const params = {
-          search: searchQuery,
           sort: sortBy,
           order: sortOrder,
           ...filters
@@ -48,7 +76,58 @@ export default function TechnologiesPage() {
         
         const response = await apiClient.getTechnologies(params);
         if (response.success && response.data && Array.isArray(response.data)) {
-          setTechnologies(response.data);
+          let filteredData = response.data;
+          
+          // Client-side filtering since backend doesn't support proper filtering
+          
+          // 1. Search filtering
+          if (searchQuery.trim()) {
+            const searchLower = searchQuery.toLowerCase();
+            filteredData = filteredData.filter(tech => 
+              tech.title.toLowerCase().includes(searchLower) ||
+              tech.public_summary.toLowerCase().includes(searchLower) ||
+              tech.category_name.toLowerCase().includes(searchLower) ||
+              (tech.owners && tech.owners.some(owner => 
+                owner.owner_name.toLowerCase().includes(searchLower)
+              ))
+            );
+          }
+          
+          // 2. Category filtering
+          if (filters.category) {
+            filteredData = filteredData.filter(tech => {
+              // Map category ID to category name for comparison
+              const categoryMap: {[key: string]: string} = {
+                '1': 'Điện – Điện tử – CNTT',
+                '2': 'Vật liệu & Công nghệ vật liệu', 
+                '3': 'Cơ khí – Động lực',
+                '4': 'Công nghệ sinh học y dược',
+                '5': 'Năng lượng & Môi trường',
+                '6': 'Nông nghiệp & Thực phẩm',
+                '7': 'Xây dựng & Kiến trúc',
+                '8': 'Giao thông vận tải'
+              };
+              return tech.category_name === categoryMap[filters.category];
+            });
+          }
+          
+          // 3. TRL Level filtering
+          if (filters.trl_level) {
+            filteredData = filteredData.filter(tech => {
+              const [min, max] = filters.trl_level.split('-').map(Number);
+              return tech.trl_level >= min && tech.trl_level <= max;
+            });
+          }
+          
+          // 4. Status filtering
+          if (filters.status) {
+            filteredData = filteredData.filter(tech => tech.status === filters.status);
+          }
+          
+          setTechnologies(filteredData);
+        } else {
+          console.error('API response error:', response);
+          setTechnologies([]);
         }
       } catch (error) {
         console.error('Error fetching technologies:', error);
@@ -57,12 +136,24 @@ export default function TechnologiesPage() {
       }
     };
 
-    fetchTechnologies();
+    // Debounce search to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      fetchTechnologies();
+    }, searchQuery ? 300 : 0);
+
+    return () => clearTimeout(timeoutId);
   }, [searchQuery, sortBy, sortOrder, filters]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search is handled by useEffect
+    // Update URL with search query
+    const params = new URLSearchParams(searchParams.toString());
+    if (searchQuery.trim()) {
+      params.set('q', searchQuery.trim());
+    } else {
+      params.delete('q');
+    }
+    router.push(`/technologies?${params.toString()}`);
   };
 
   const handleSort = (field: string) => {
@@ -72,6 +163,16 @@ export default function TechnologiesPage() {
       setSortBy(field);
       setSortOrder('DESC');
     }
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilters({
+      category: '',
+      trl_level: '',
+      status: 'ACTIVE'
+    });
+    router.push('/technologies');
   };
 
   const getTRLColor = (level: number) => {
@@ -116,6 +217,11 @@ export default function TechnologiesPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch(e);
+                    }
+                  }}
                   placeholder="Tìm kiếm công nghệ..."
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -126,6 +232,15 @@ export default function TechnologiesPage() {
               >
                 Tìm kiếm
               </button>
+              {(searchQuery || filters.category || filters.trl_level || filters.status !== 'ACTIVE') && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Xóa bộ lọc
+                </button>
+              )}
             </div>
 
             {/* Filters */}
@@ -140,9 +255,11 @@ export default function TechnologiesPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Tất cả danh mục</option>
-                  <option value="1">Khoa học tự nhiên</option>
-                  <option value="2">Khoa học kỹ thuật & công nghệ</option>
-                  <option value="3">Khoa học y, dược</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               
@@ -185,7 +302,17 @@ export default function TechnologiesPage() {
           <div className="flex items-center space-x-4">
             <p className="text-gray-600">
               Tìm thấy <span className="font-semibold">{technologies.length}</span> công nghệ
+              {searchQuery && (
+                <span className="ml-2">
+                  cho từ khóa "<span className="font-medium text-blue-600">{searchQuery}</span>"
+                </span>
+              )}
             </p>
+            {(searchQuery || filters.category || filters.trl_level || filters.status !== 'ACTIVE') && (
+              <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                ⚠️ Tìm kiếm và bộ lọc được thực hiện ở frontend (backend chưa hỗ trợ đầy đủ)
+              </div>
+            )}
           </div>
           
           <div className="flex items-center space-x-4">
@@ -271,16 +398,40 @@ export default function TechnologiesPage() {
                       </p>
                     )}
 
+                    {tech.category_name && (
+                      <div className="mb-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {tech.category_name}
+                        </span>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
-                        <span>Mới cập nhật</span>
+                        <span>{new Date(tech.updated_at).toLocaleDateString('vi-VN')}</span>
                       </div>
                       <div className="flex items-center">
                         <Eye className="h-4 w-4 mr-1" />
                         <span>123 lượt xem</span>
                       </div>
                     </div>
+
+                    {tech.asking_price && (
+                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Giá đề xuất:</span>
+                          <span className="font-semibold text-green-600">
+                            {new Intl.NumberFormat('vi-VN').format(parseFloat(tech.asking_price))} {tech.currency}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Loại: {tech.pricing_type === 'ASK' ? 'Giá cố định' : 
+                                 tech.pricing_type === 'AUCTION' ? 'Đấu giá' : 
+                                 tech.pricing_type === 'APPRAISAL' ? 'Định giá' : tech.pricing_type}
+                        </div>
+                      </div>
+                    )}
 
                     <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                       Xem chi tiết
@@ -313,16 +464,40 @@ export default function TechnologiesPage() {
                         </p>
                       )}
 
+                      {tech.category_name && (
+                        <div className="mb-2">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {tech.category_name}
+                          </span>
+                        </div>
+                      )}
+
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
-                          <span>Mới cập nhật</span>
+                          <span>{new Date(tech.updated_at).toLocaleDateString('vi-VN')}</span>
                         </div>
                         <div className="flex items-center">
                           <Eye className="h-4 w-4 mr-1" />
                           <span>123 lượt xem</span>
                         </div>
                       </div>
+
+                      {tech.asking_price && (
+                        <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Giá đề xuất:</span>
+                            <span className="font-semibold text-green-600">
+                              {new Intl.NumberFormat('vi-VN').format(parseFloat(tech.asking_price))} {tech.currency}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Loại: {tech.pricing_type === 'ASK' ? 'Giá cố định' : 
+                                   tech.pricing_type === 'AUCTION' ? 'Đấu giá' : 
+                                   tech.pricing_type === 'APPRAISAL' ? 'Định giá' : tech.pricing_type}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">

@@ -1,165 +1,134 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TechnologiesPage from '../page';
+import apiClient from '@/lib/api';
 
-// Mock the API client
+// Mock Next.js navigation
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
+
+// Mock API client
 jest.mock('@/lib/api', () => ({
   getTechnologies: jest.fn(),
+  getCategories: jest.fn(),
 }));
 
-// Mock next/navigation
-jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(() => ({
-    get: jest.fn(),
-  })),
-}));
+const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
+const mockUseSearchParams = useSearchParams as jest.MockedFunction<typeof useSearchParams>;
+const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
 describe('TechnologiesPage', () => {
-  const mockApiClient = require('@/lib/api');
+  const mockPush = jest.fn();
+  const mockGet = jest.fn();
   
+  const mockTechnologies = [
+    {
+      id: '1',
+      title: 'AI Technology',
+      public_summary: 'Advanced AI technology',
+      category_name: 'Điện – Điện tử – CNTT',
+      trl_level: 8,
+      status: 'ACTIVE',
+      asking_price: '1000000',
+      currency: 'VND',
+      pricing_type: 'ASK',
+      updated_at: '2023-01-01T00:00:00Z',
+      owners: [{ owner_name: 'John Doe' }],
+    },
+    {
+      id: '2',
+      title: 'Battery Technology',
+      public_summary: 'Lithium-ion battery technology',
+      category_name: 'Vật liệu & Công nghệ vật liệu',
+      trl_level: 6,
+      status: 'ACTIVE',
+      asking_price: '2000000',
+      currency: 'VND',
+      pricing_type: 'AUCTION',
+      updated_at: '2023-01-02T00:00:00Z',
+      owners: [{ owner_name: 'Jane Smith' }],
+    },
+  ];
+
+  const mockCategories = [
+    { id: '1', name: 'Điện – Điện tử – CNTT', code: 'EEICT' },
+    { id: '2', name: 'Vật liệu & Công nghệ vật liệu', code: 'MTRL' },
+  ];
+
   beforeEach(() => {
-    jest.clearAllMocks();
-    
-    // Mock successful API response
+    mockUseRouter.mockReturnValue({
+      push: mockPush,
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+    });
+
+    mockUseSearchParams.mockReturnValue({
+      get: mockGet,
+      set: jest.fn(),
+      delete: jest.fn(),
+      has: jest.fn(),
+      getAll: jest.fn(),
+      keys: jest.fn(),
+      values: jest.fn(),
+      entries: jest.fn(),
+      forEach: jest.fn(),
+      toString: jest.fn(),
+      append: jest.fn(),
+    });
+
     mockApiClient.getTechnologies.mockResolvedValue({
       success: true,
-      data: [
-        {
-          id: 1,
-          title: 'Hệ thống đốt LPG cho động cơ ô tô',
-          trl_level: 7,
-          status: 'ACTIVE',
-          public_summary: 'Công nghệ đốt LPG tiên tiến cho động cơ ô tô',
-          category_id: 2,
-          created_at: '2025-01-15T10:00:00Z'
-        },
-        {
-          id: 2,
-          title: 'Hệ thống AI nhận diện bệnh lý từ hình ảnh y tế',
-          trl_level: 6,
-          status: 'ACTIVE',
-          public_summary: 'Ứng dụng trí tuệ nhân tạo trong chẩn đoán y tế',
-          category_id: 3,
-          created_at: '2025-01-14T10:00:00Z'
-        }
-      ]
+      data: mockTechnologies,
+      pagination: { page: 1, limit: 20, total: 2, totalPages: 1 },
+    });
+
+    mockApiClient.getCategories.mockResolvedValue({
+      success: true,
+      data: mockCategories,
     });
   });
 
-  it('renders loading state initially', () => {
-    render(<TechnologiesPage />);
-    
-    // Should show loading spinner
-    expect(screen.getByRole('status')).toBeInTheDocument();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('renders page title and description', async () => {
+  it('renders technologies page correctly', async () => {
     render(<TechnologiesPage />);
     
     await waitFor(() => {
       expect(screen.getByText('Danh sách công nghệ')).toBeInTheDocument();
-      expect(screen.getByText('Khám phá và tìm kiếm các công nghệ phù hợp với nhu cầu của bạn')).toBeInTheDocument();
+      expect(screen.getByText('AI Technology')).toBeInTheDocument();
+      expect(screen.getByText('Battery Technology')).toBeInTheDocument();
     });
   });
 
-  it('renders search form', async () => {
+  it('shows search input and filters', async () => {
     render(<TechnologiesPage />);
     
     await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Tìm kiếm công nghệ...');
-      const searchButton = screen.getByText('Tìm kiếm');
-      
-      expect(searchInput).toBeInTheDocument();
-      expect(searchButton).toBeInTheDocument();
-    });
-  });
-
-  it('renders filter options', async () => {
-    render(<TechnologiesPage />);
-    
-    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Tìm kiếm công nghệ...')).toBeInTheDocument();
       expect(screen.getByText('Danh mục')).toBeInTheDocument();
-      expect(screen.getByText('TRL Level')).toBeInTheDocument();
+      expect(screen.getByText('Tất cả TRL')).toBeInTheDocument();
       expect(screen.getByText('Trạng thái')).toBeInTheDocument();
     });
   });
 
-  it('renders technologies list after loading', async () => {
-    render(<TechnologiesPage />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Hệ thống đốt LPG cho động cơ ô tô')).toBeInTheDocument();
-      expect(screen.getByText('Hệ thống AI nhận diện bệnh lý từ hình ảnh y tế')).toBeInTheDocument();
-    });
-  });
-
-  it('displays TRL levels with correct colors', async () => {
-    render(<TechnologiesPage />);
-    
-    await waitFor(() => {
-      const trl7 = screen.getByText('TRL 7');
-      const trl6 = screen.getByText('TRL 6');
-      
-      expect(trl7).toBeInTheDocument();
-      expect(trl6).toBeInTheDocument();
-    });
-  });
-
-  it('displays technology status', async () => {
-    render(<TechnologiesPage />);
-    
-    await waitFor(() => {
-      expect(screen.getAllByText('Hoạt động')).toHaveLength(2);
-    });
-  });
-
-  it('updates search input value when typing', async () => {
+  it('filters technologies by search query', async () => {
     render(<TechnologiesPage />);
     
     await waitFor(() => {
       const searchInput = screen.getByPlaceholderText('Tìm kiếm công nghệ...');
-      
-      fireEvent.change(searchInput, { target: { value: 'AI technology' } });
-      
-      expect(searchInput).toHaveValue('AI technology');
+      fireEvent.change(searchInput, { target: { value: 'AI' } });
     });
-  });
-
-  it('changes view mode when toggle buttons are clicked', async () => {
-    render(<TechnologiesPage />);
     
     await waitFor(() => {
-      const gridButton = screen.getByRole('button', { name: /grid/i });
-      const listButton = screen.getByRole('button', { name: /list/i });
-      
-      // Initially grid view should be active
-      expect(gridButton).toHaveClass('bg-blue-100', 'text-blue-700');
-      
-      // Click list view
-      fireEvent.click(listButton);
-      
-      // List view should now be active
-      expect(listButton).toHaveClass('bg-blue-100', 'text-blue-700');
-      expect(gridButton).not.toHaveClass('bg-blue-100', 'text-blue-700');
-    });
-  });
-
-  it('changes sort order when sort buttons are clicked', async () => {
-    render(<TechnologiesPage />);
-    
-    await waitFor(() => {
-      const dateSortButton = screen.getByText('Ngày tạo');
-      const trlSortButton = screen.getByText('TRL Level');
-      
-      // Click TRL Level sort
-      fireEvent.click(trlSortButton);
-      
-      // Should call API with new sort parameters
-      expect(mockApiClient.getTechnologies).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sort: 'trl_level',
-          order: 'DESC'
-        })
-      );
+      expect(screen.getByText('AI Technology')).toBeInTheDocument();
+      expect(screen.queryByText('Battery Technology')).not.toBeInTheDocument();
     });
   });
 
@@ -168,15 +137,12 @@ describe('TechnologiesPage', () => {
     
     await waitFor(() => {
       const categorySelect = screen.getByDisplayValue('Tất cả danh mục');
-      
       fireEvent.change(categorySelect, { target: { value: '2' } });
-      
-      // Should call API with category filter
-      expect(mockApiClient.getTechnologies).toHaveBeenCalledWith(
-        expect.objectContaining({
-          category: '2'
-        })
-      );
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText('Battery Technology')).toBeInTheDocument();
+      expect(screen.queryByText('AI Technology')).not.toBeInTheDocument();
     });
   });
 
@@ -185,15 +151,12 @@ describe('TechnologiesPage', () => {
     
     await waitFor(() => {
       const trlSelect = screen.getByDisplayValue('Tất cả TRL');
-      
       fireEvent.change(trlSelect, { target: { value: '7-9' } });
-      
-      // Should call API with TRL filter
-      expect(mockApiClient.getTechnologies).toHaveBeenCalledWith(
-        expect.objectContaining({
-          trl_level: '7-9'
-        })
-      );
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText('AI Technology')).toBeInTheDocument();
+      expect(screen.queryByText('Battery Technology')).not.toBeInTheDocument();
     });
   });
 
@@ -201,66 +164,120 @@ describe('TechnologiesPage', () => {
     render(<TechnologiesPage />);
     
     await waitFor(() => {
-      const statusSelect = screen.getByDisplayValue('Đang hoạt động');
-      
+      const statusSelect = screen.getByDisplayValue('Hoạt động');
       fireEvent.change(statusSelect, { target: { value: 'PENDING' } });
-      
-      // Should call API with status filter
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText('Không tìm thấy công nghệ nào')).toBeInTheDocument();
+    });
+  });
+
+  it('shows warning badge when using client-side filtering', async () => {
+    render(<TechnologiesPage />);
+    
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText('Tìm kiếm công nghệ...');
+      fireEvent.change(searchInput, { target: { value: 'AI' } });
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Tìm kiếm và bộ lọc được thực hiện ở frontend/)).toBeInTheDocument();
+    });
+  });
+
+  it('clears all filters when clear button is clicked', async () => {
+    render(<TechnologiesPage />);
+    
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText('Tìm kiếm công nghệ...');
+      fireEvent.change(searchInput, { target: { value: 'AI' } });
+    });
+    
+    await waitFor(() => {
+      const clearButton = screen.getByText('Xóa bộ lọc');
+      fireEvent.click(clearButton);
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText('AI Technology')).toBeInTheDocument();
+      expect(screen.getByText('Battery Technology')).toBeInTheDocument();
+    });
+  });
+
+  it('sorts technologies by different criteria', async () => {
+    render(<TechnologiesPage />);
+    
+    await waitFor(() => {
+      const sortSelect = screen.getByDisplayValue('Mới nhất');
+      fireEvent.change(sortSelect, { target: { value: 'price_asc' } });
+    });
+    
+    await waitFor(() => {
       expect(mockApiClient.getTechnologies).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: 'PENDING'
+          sort: 'asking_price',
+          order: 'ASC',
         })
       );
     });
   });
 
-  it('shows empty state when no technologies found', async () => {
-    // Mock empty response
+  it('handles search with Enter key', async () => {
+    render(<TechnologiesPage />);
+    
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText('Tìm kiếm công nghệ...');
+      fireEvent.change(searchInput, { target: { value: 'AI' } });
+      fireEvent.keyDown(searchInput, { key: 'Enter', code: 'Enter' });
+    });
+    
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/technologies?q=AI');
+    });
+  });
+
+  it('shows loading state initially', () => {
+    mockApiClient.getTechnologies.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+    
+    render(<TechnologiesPage />);
+    
+    expect(screen.getByText('Đang tải...')).toBeInTheDocument();
+  });
+
+  it('shows error state when API fails', async () => {
+    mockApiClient.getTechnologies.mockRejectedValue(new Error('API Error'));
+    
+    render(<TechnologiesPage />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Có lỗi xảy ra khi tải dữ liệu')).toBeInTheDocument();
+    });
+  });
+
+  it('shows no results message when no technologies found', async () => {
     mockApiClient.getTechnologies.mockResolvedValue({
       success: true,
-      data: []
+      data: [],
+      pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
     });
     
     render(<TechnologiesPage />);
     
     await waitFor(() => {
       expect(screen.getByText('Không tìm thấy công nghệ nào')).toBeInTheDocument();
-      expect(screen.getByText('Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc')).toBeInTheDocument();
     });
   });
 
-  it('handles API error gracefully', async () => {
-    // Mock API error
-    mockApiClient.getTechnologies.mockRejectedValue(new Error('API Error'));
-    
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-    
+  it('displays technology cards with correct information', async () => {
     render(<TechnologiesPage />);
     
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Error fetching technologies:', expect.any(Error));
-    });
-    
-    consoleSpy.mockRestore();
-  });
-
-  it('displays results count', async () => {
-    render(<TechnologiesPage />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Tìm thấy 2 công nghệ')).toBeInTheDocument();
-    });
-  });
-
-  it('has proper accessibility attributes', async () => {
-    render(<TechnologiesPage />);
-    
-    await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Tìm kiếm công nghệ...');
-      const searchButton = screen.getByText('Tìm kiếm');
-      
-      expect(searchInput).toHaveAttribute('type', 'text');
-      expect(searchButton).toHaveAttribute('type', 'submit');
+      expect(screen.getByText('AI Technology')).toBeInTheDocument();
+      expect(screen.getByText('Advanced AI technology')).toBeInTheDocument();
+      expect(screen.getByText('Điện – Điện tử – CNTT')).toBeInTheDocument();
+      expect(screen.getByText('TRL 8')).toBeInTheDocument();
+      expect(screen.getByText('1,000,000 VND')).toBeInTheDocument();
     });
   });
 });

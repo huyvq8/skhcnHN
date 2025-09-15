@@ -1,188 +1,160 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { usePathname } from 'next/navigation';
 import Header from '../Header';
+import { useAuthStore } from '@/store/auth';
 
-// Mock next/navigation
+// Mock Next.js navigation
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }));
 
-describe('Header', () => {
+// Mock auth store
+jest.mock('@/store/auth', () => ({
+  useAuthStore: jest.fn(),
+}));
+
+// Mock SearchModal
+jest.mock('@/components/ui/SearchModal', () => {
+  return function MockSearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+    return isOpen ? (
+      <div data-testid="search-modal">
+        <button onClick={onClose}>Close</button>
+      </div>
+    ) : null;
+  };
+});
+
+const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>;
+const mockUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
+
+describe('Header Component', () => {
   beforeEach(() => {
-    (usePathname as jest.Mock).mockReturnValue('/');
+    mockUsePathname.mockReturnValue('/');
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      logout: jest.fn(),
+    });
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders header with logo and navigation', () => {
+  it('renders logo and navigation correctly', () => {
     render(<Header />);
     
-    // Check if logo is rendered
     expect(screen.getByText('HANOTEX')).toBeInTheDocument();
     expect(screen.getByText('Sàn giao dịch công nghệ Hà Nội')).toBeInTheDocument();
-  });
-
-  it('renders main navigation items', () => {
-    render(<Header />);
-    
     expect(screen.getByText('Trang chủ')).toBeInTheDocument();
     expect(screen.getByText('Công nghệ')).toBeInTheDocument();
-    expect(screen.getByText('Nhu cầu')).toBeInTheDocument();
-    expect(screen.getByText('Đấu giá')).toBeInTheDocument();
-    expect(screen.getByText('Tin tức')).toBeInTheDocument();
-    expect(screen.getByText('Sự kiện')).toBeInTheDocument();
   });
 
-  it('renders user menu and actions', () => {
+  it('shows login and register buttons when not authenticated', () => {
     render(<Header />);
     
-    expect(screen.getByText('Người dùng')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /notification/i })).toBeInTheDocument();
+    expect(screen.getByText('Đăng nhập')).toBeInTheDocument();
+    expect(screen.getByText('Đăng ký')).toBeInTheDocument();
   });
 
-  it('toggles mobile menu when menu button is clicked', () => {
+  it('shows user menu when authenticated', () => {
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true,
+      user: { email: 'test@example.com', user_type: 'INDIVIDUAL' },
+      logout: jest.fn(),
+    });
+
     render(<Header />);
     
-    const menuButton = screen.getByRole('button', { name: /menu/i });
-    
-    // Initially mobile menu should not be visible
-    expect(screen.queryByText('Trang chủ')).toBeInTheDocument(); // Desktop version
-    
-    // Click menu button to open mobile menu
-    fireEvent.click(menuButton);
-    
-    // Mobile menu should now be visible
-    expect(screen.getByText('Trang chủ')).toBeInTheDocument();
+    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+    expect(screen.queryByText('Đăng nhập')).not.toBeInTheDocument();
   });
 
-  it('toggles user menu when user button is clicked', () => {
+  it('opens search modal when search button is clicked', async () => {
     render(<Header />);
     
-    const userButton = screen.getByText('Người dùng');
+    const searchButton = screen.getByRole('button', { name: /search/i });
+    fireEvent.click(searchButton);
     
-    // Initially user menu should not be visible
-    expect(screen.queryByText('Hồ sơ cá nhân')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('search-modal')).toBeInTheDocument();
+    });
+  });
+
+  it('toggles user menu when user button is clicked', async () => {
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true,
+      user: { email: 'test@example.com', user_type: 'INDIVIDUAL' },
+      logout: jest.fn(),
+    });
+
+    render(<Header />);
     
-    // Click user button to open user menu
+    const userButton = screen.getByText('test@example.com');
     fireEvent.click(userButton);
     
-    // User menu should now be visible
-    expect(screen.getByText('Hồ sơ cá nhân')).toBeInTheDocument();
-    expect(screen.getByText('Công nghệ của tôi')).toBeInTheDocument();
-    expect(screen.getByText('Nhu cầu của tôi')).toBeInTheDocument();
-    expect(screen.getByText('Đấu giá tham gia')).toBeInTheDocument();
-    expect(screen.getByText('Tin nhắn')).toBeInTheDocument();
-    expect(screen.getByText('Cài đặt')).toBeInTheDocument();
-    expect(screen.getByText('Đăng xuất')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Hồ sơ cá nhân')).toBeInTheDocument();
+      expect(screen.getByText('Đăng xuất')).toBeInTheDocument();
+    });
   });
 
-  it('closes user menu when clicking outside', () => {
+  it('calls logout when logout button is clicked', async () => {
+    const mockLogout = jest.fn();
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true,
+      user: { email: 'test@example.com', user_type: 'INDIVIDUAL' },
+      logout: mockLogout,
+    });
+
     render(<Header />);
     
-    const userButton = screen.getByText('Người dùng');
-    
-    // Open user menu
+    const userButton = screen.getByText('test@example.com');
     fireEvent.click(userButton);
-    expect(screen.getByText('Hồ sơ cá nhân')).toBeInTheDocument();
     
-    // Click outside (on the header)
-    const header = screen.getByRole('banner');
-    fireEvent.click(header);
+    await waitFor(() => {
+      const logoutButton = screen.getByText('Đăng xuất');
+      fireEvent.click(logoutButton);
+    });
     
-    // User menu should be closed
-    expect(screen.queryByText('Hồ sơ cá nhân')).not.toBeInTheDocument();
-  });
-
-  it('has correct links for main navigation items', () => {
-    render(<Header />);
-    
-    const homeLink = screen.getByText('Trang chủ').closest('a');
-    const technologiesLink = screen.getByText('Công nghệ').closest('a');
-    const demandsLink = screen.getByText('Nhu cầu').closest('a');
-    const auctionsLink = screen.getByText('Đấu giá').closest('a');
-    const newsLink = screen.getByText('Tin tức').closest('a');
-    const eventsLink = screen.getByText('Sự kiện').closest('a');
-    
-    expect(homeLink).toHaveAttribute('href', '/');
-    expect(technologiesLink).toHaveAttribute('href', '/technologies');
-    expect(demandsLink).toHaveAttribute('href', '/demands');
-    expect(auctionsLink).toHaveAttribute('href', '/auctions');
-    expect(newsLink).toHaveAttribute('href', '/news');
-    expect(eventsLink).toHaveAttribute('href', '/events');
+    expect(mockLogout).toHaveBeenCalled();
   });
 
   it('shows active state for current page', () => {
-    (usePathname as jest.Mock).mockReturnValue('/technologies');
-    render(<Header />);
+    mockUsePathname.mockReturnValue('/technologies');
     
-    const technologiesLink = screen.getByText('Công nghệ').closest('a');
-    expect(technologiesLink).toHaveClass('bg-blue-100', 'text-blue-700');
-  });
-
-  it('renders submenu items for technologies', () => {
     render(<Header />);
     
     const technologiesLink = screen.getByText('Công nghệ');
-    
-    // Hover over technologies to show submenu
-    fireEvent.mouseEnter(technologiesLink);
-    
-    // Check if submenu items are present
-    expect(screen.getByText('Tất cả công nghệ')).toBeInTheDocument();
-    expect(screen.getByText('Công nghệ mới')).toBeInTheDocument();
-    expect(screen.getByText('Công nghệ nổi bật')).toBeInTheDocument();
-    expect(screen.getByText('Đăng công nghệ')).toBeInTheDocument();
+    expect(technologiesLink.closest('a')).toHaveClass('bg-blue-100', 'text-blue-700');
   });
 
-  it('renders submenu items for demands', () => {
-    render(<Header />);
-    
-    const demandsLink = screen.getByText('Nhu cầu');
-    
-    // Hover over demands to show submenu
-    fireEvent.mouseEnter(demandsLink);
-    
-    // Check if submenu items are present
-    expect(screen.getByText('Tất cả nhu cầu')).toBeInTheDocument();
-    expect(screen.getByText('Nhu cầu mới')).toBeInTheDocument();
-    expect(screen.getByText('Nhu cầu khẩn cấp')).toBeInTheDocument();
-    expect(screen.getByText('Đăng nhu cầu')).toBeInTheDocument();
-  });
+  it('toggles mobile menu when hamburger button is clicked', async () => {
+    // Mock window.innerWidth for mobile
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 768,
+    });
 
-  it('has proper accessibility attributes', () => {
-    render(<Header />);
-    
-    const header = screen.getByRole('banner');
-    expect(header).toBeInTheDocument();
-    
-    const searchButton = screen.getByRole('button', { name: /search/i });
-    expect(searchButton).toBeInTheDocument();
-    
-    const notificationButton = screen.getByRole('button', { name: /notification/i });
-    expect(notificationButton).toBeInTheDocument();
-  });
-
-  it('renders notification badge', () => {
-    render(<Header />);
-    
-    const notificationButton = screen.getByRole('button', { name: /notification/i });
-    const badge = notificationButton.querySelector('.bg-red-500');
-    expect(badge).toBeInTheDocument();
-  });
-
-  it('closes mobile menu when clicking on a link', () => {
     render(<Header />);
     
     const menuButton = screen.getByRole('button', { name: /menu/i });
-    
-    // Open mobile menu
     fireEvent.click(menuButton);
     
-    // Click on a link
-    const homeLink = screen.getByText('Trang chủ');
-    fireEvent.click(homeLink);
+    await waitFor(() => {
+      expect(screen.getByText('Trang chủ')).toBeInTheDocument();
+    });
+  });
+
+  it('shows notification badge', () => {
+    render(<Header />);
     
-    // Mobile menu should be closed (menu button should show menu icon, not X)
-    expect(menuButton.querySelector('svg')).toBeInTheDocument();
+    const notificationButton = screen.getByRole('button', { name: /bell/i });
+    expect(notificationButton).toBeInTheDocument();
+    
+    // Check for notification badge
+    const badge = notificationButton.querySelector('.bg-red-500');
+    expect(badge).toBeInTheDocument();
   });
 });

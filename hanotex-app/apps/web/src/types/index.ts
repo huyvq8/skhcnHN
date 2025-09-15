@@ -262,6 +262,24 @@ export interface JWTPayload {
   exp?: number;
 }
 
+// NextAuth types
+export interface NextAuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  userType: string;
+  isVerified: boolean;
+  token?: string;
+}
+
+export interface NextAuthSession {
+  user: NextAuthUser;
+  accessToken?: string;
+  apiToken?: string;
+  expires: string;
+}
+
 // File upload interface
 export interface UploadedFile {
   fieldname: string;

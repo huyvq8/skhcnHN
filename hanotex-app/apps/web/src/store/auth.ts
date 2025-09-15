@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import { User, AuthState, LoginRequest, RegisterRequest } from '@/types';
 import apiClient from '@/lib/api';
 
@@ -27,19 +28,26 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true });
         
         try {
-          const response = await apiClient.login({ email, password });
-          
+          const result = await signIn('credentials', {
+            email,
+            password,
+            redirect: false,
+          });
+
+          if (result?.error) {
+            set({ isLoading: false });
+            throw new Error('Đăng nhập thất bại');
+          }
+
+          // Get user data after successful login
+          const response = await apiClient.getCurrentUser();
           if (response.success && response.data) {
-            const { user, token } = response.data;
             set({
-              user,
-              token,
+              user: response.data.user,
+              token: response.data.token,
               isAuthenticated: true,
               isLoading: false,
             });
-          } else {
-            set({ isLoading: false });
-            throw new Error(response.error || 'Đăng nhập thất bại');
           }
         } catch (error: any) {
           console.error('Login error:', error);
@@ -75,7 +83,7 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: () => {
-        apiClient.logout();
+        signOut({ redirect: false });
         set({
           user: null,
           token: null,
@@ -123,12 +131,43 @@ export const useAuthStore = create<AuthStore>()(
   )
 );
 
+// Hook to sync NextAuth session with Zustand store
+export const useAuthSync = () => {
+  const { data: session, status } = useSession();
+  const { user, isAuthenticated } = useAuthStore();
+
+  // Sync NextAuth session with Zustand store
+  if (status === 'authenticated' && session?.user && !isAuthenticated) {
+    useAuthStore.setState({
+      user: session.user as any,
+      isAuthenticated: true,
+      token: session.apiToken || null,
+    });
+  } else if (status === 'unauthenticated' && isAuthenticated) {
+    useAuthStore.setState({
+      user: null,
+      isAuthenticated: false,
+      token: null,
+    });
+  }
+};
+
 // Selectors
-export const useAuth = () => useAuthStore((state) => ({
-  user: state.user,
-  isAuthenticated: state.isAuthenticated,
-  isLoading: state.isLoading,
-}));
+export const useAuth = () => {
+  const { data: session, status } = useSession();
+  const storeState = useAuthStore((state) => ({
+    user: state.user,
+    isAuthenticated: state.isAuthenticated,
+    isLoading: state.isLoading,
+  }));
+
+  // Use NextAuth session as source of truth
+  return {
+    user: session?.user || storeState.user,
+    isAuthenticated: status === 'authenticated' || storeState.isAuthenticated,
+    isLoading: status === 'loading' || storeState.isLoading,
+  };
+};
 
 export const useAuthActions = () => useAuthStore((state) => ({
   login: state.login,
@@ -139,7 +178,21 @@ export const useAuthActions = () => useAuthStore((state) => ({
   clearError: state.clearError,
 }));
 
-export const useUser = () => useAuthStore((state) => state.user);
-export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
-export const useIsLoading = () => useAuthStore((state) => state.isLoading);
+export const useUser = () => {
+  const { data: session } = useSession();
+  const storeUser = useAuthStore((state) => state.user);
+  return session?.user || storeUser;
+};
+
+export const useIsAuthenticated = () => {
+  const { status } = useSession();
+  const storeAuth = useAuthStore((state) => state.isAuthenticated);
+  return status === 'authenticated' || storeAuth;
+};
+
+export const useIsLoading = () => {
+  const { status } = useSession();
+  const storeLoading = useAuthStore((state) => state.isLoading);
+  return status === 'loading' || storeLoading;
+};
 

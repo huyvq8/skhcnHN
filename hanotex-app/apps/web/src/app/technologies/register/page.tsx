@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth';
+import { useAuth } from '@/store/auth';
+import { useMasterData } from '@/hooks/useMasterData';
 import { 
   ArrowLeft,
   Save,
@@ -16,7 +17,8 @@ import {
 
 export default function RegisterTechnologyPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
+  const { masterData, loading: masterDataLoading, error: masterDataError } = useMasterData();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -318,15 +320,9 @@ export default function RegisterTechnologyPage() {
   };
 
   const getIPTypeDescription = (ipType: string) => {
-    const descriptions: { [key: string]: string } = {
-      'PATENT': 'Giải pháp kỹ thuật mới, sáng tạo, áp dụng công nghiệp. Bảo hộ 20 năm.',
-      'UTILITY_MODEL': 'Giải pháp kỹ thuật mới so với hiện tại. Bảo hộ 10 năm.',
-      'INDUSTRIAL_DESIGN': 'Hình dáng bên ngoài sản phẩm. Bảo hộ 15 năm.',
-      'TRADEMARK': 'Dấu hiệu phân biệt hàng hóa/dịch vụ. Bảo hộ 10 năm, có thể gia hạn.',
-      'COPYRIGHT': 'Bảo hộ mã nguồn, thuật toán. Bảo hộ suốt đời + 50 năm.',
-      'TRADE_SECRET': 'Thông tin có giá trị thương mại, bảo mật. Không có thời hạn.'
-    };
-    return descriptions[ipType] || '';
+    if (!masterData?.ipTypes) return '';
+    const ipTypeData = masterData.ipTypes.find(ip => ip.value === ipType);
+    return ipTypeData?.description || '';
   };
 
   const processOCR = async (file: File) => {
@@ -524,6 +520,20 @@ export default function RegisterTechnologyPage() {
             </div>
           )}
 
+          {masterDataError && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md flex items-center">
+              <AlertCircle className="h-5 w-5 mr-2" />
+              Lỗi tải dữ liệu: {masterDataError}
+            </div>
+          )}
+
+          {masterDataLoading && (
+            <div className="bg-blue-50 border border-blue-200 text-blue-600 px-4 py-3 rounded-md flex items-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
+              Đang tải dữ liệu...
+            </div>
+          )}
+
           {success && (
             <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
               {success}
@@ -533,7 +543,7 @@ export default function RegisterTechnologyPage() {
           {/* 1. Thông tin người đăng */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">1. Thông tin người đăng</h2>
+              <h2 className="text-lg font-semibold text-gray-900">1. Thông tin người đăng *</h2>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -780,7 +790,7 @@ export default function RegisterTechnologyPage() {
           {/* 2. Thông tin cơ bản */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">2. Thông tin cơ bản</h2>
+              <h2 className="text-lg font-semibold text-gray-900">2. Thông tin cơ bản *</h2>
             </div>
             <div className="p-6 space-y-4">
               <div>
@@ -917,15 +927,14 @@ export default function RegisterTechnologyPage() {
                     value={formData.classification.field}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={masterDataLoading}
                   >
                     <option value="">Chọn lĩnh vực</option>
-                    <option value="SCI_NAT">Khoa học tự nhiên</option>
-                    <option value="SCI_ENG">Khoa học kỹ thuật & công nghệ</option>
-                    <option value="SCI_MED">Khoa học y, dược</option>
-                    <option value="SCI_AGR">Khoa học nông nghiệp</option>
-                    <option value="SCI_SOC">Khoa học xã hội</option>
-                    <option value="SCI_HUM">Khoa học nhân văn</option>
-                    <option value="SCI_INT">Khoa học liên ngành</option>
+                    {masterData?.fields.map((field) => (
+                      <option key={field.value} value={field.value}>
+                        {field.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -939,22 +948,14 @@ export default function RegisterTechnologyPage() {
                     value={formData.classification.industry}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={masterDataLoading}
                   >
                     <option value="">Chọn ngành</option>
-                    <option value="MECH">Cơ khí – Động lực</option>
-                    <option value="EEICT">Điện – Điện tử – CNTT</option>
-                    <option value="MTRL">Vật liệu & Công nghệ vật liệu</option>
-                    <option value="ENV">Công nghệ môi trường</option>
-                    <option value="AUTO">Tự động hóa & Robot</option>
-                    <option value="BIOTECH">Công nghệ sinh học y dược</option>
-                    <option value="MEDDEV">Thiết bị y tế</option>
-                    <option value="PHARMA">Dược học</option>
-                    <option value="AGRI">Nông nghiệp</option>
-                    <option value="FOOD">Công nghệ thực phẩm</option>
-                    <option value="AQUA">Thủy sản</option>
-                    <option value="AI">Trí tuệ nhân tạo</option>
-                    <option value="NANO">Công nghệ nano</option>
-                    <option value="SPACE">Công nghệ vũ trụ</option>
+                    {masterData?.industries.map((industry) => (
+                      <option key={industry.value} value={industry.value}>
+                        {industry.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -968,23 +969,14 @@ export default function RegisterTechnologyPage() {
                     value={formData.classification.specialty}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={masterDataLoading}
                   >
                     <option value="">Chọn chuyên ngành</option>
-                    <option value="ENGINE_INTERNAL">Động cơ đốt trong</option>
-                    <option value="PRECISION_MECHANICS">Cơ khí chính xác</option>
-                    <option value="TRANSPORTATION">Phương tiện giao thông</option>
-                    <option value="SEMICONDUCTOR">Bán dẫn</option>
-                    <option value="TELECOMMUNICATIONS">Viễn thông</option>
-                    <option value="SYSTEM_SOFTWARE">Phần mềm hệ thống</option>
-                    <option value="POLYMER_COMPOSITE">Polyme/Compozit</option>
-                    <option value="NANO_MATERIALS">Vật liệu nano</option>
-                    <option value="BATTERY_FUEL">Pin & Nhiên liệu</option>
-                    <option value="WATER_TREATMENT">Xử lý nước thải</option>
-                    <option value="WASTE_RECYCLING">Tái chế chất thải</option>
-                    <option value="EMISSION_REDUCTION">Giảm phát thải</option>
-                    <option value="INDUSTRIAL_ROBOT">Robot công nghiệp</option>
-                    <option value="INDUSTRIAL_IOT">IoT công nghiệp</option>
-                    <option value="SMART_CONTROL">Điều khiển thông minh</option>
+                    {masterData?.specialties.map((specialty) => (
+                      <option key={specialty.value} value={specialty.value}>
+                        {specialty.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1001,17 +993,14 @@ export default function RegisterTechnologyPage() {
                     value={formData.trlLevel}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={masterDataLoading}
                   >
                     <option value="">Chọn mức độ TRL</option>
-                    <option value="1">TRL 1 - Nguyên lý cơ bản</option>
-                    <option value="2">TRL 2 - Khái niệm công nghệ</option>
-                    <option value="3">TRL 3 - Bằng chứng khái niệm</option>
-                    <option value="4">TRL 4 - Xác thực trong phòng thí nghiệm</option>
-                    <option value="5">TRL 5 - Xác thực trong môi trường liên quan</option>
-                    <option value="6">TRL 6 - Trình diễn trong môi trường liên quan</option>
-                    <option value="7">TRL 7 - Trình diễn trong môi trường vận hành</option>
-                    <option value="8">TRL 8 - Hệ thống hoàn chỉnh và đủ điều kiện</option>
-                    <option value="9">TRL 9 - Hệ thống thực tế được chứng minh</option>
+                    {masterData?.trlLevels.map((trl) => (
+                      <option key={trl.value} value={trl.value}>
+                        {trl.label}
+                      </option>
+                    ))}
                   </select>
                   
                   {/* Gợi ý TRL */}
@@ -1035,18 +1024,14 @@ export default function RegisterTechnologyPage() {
                     value={formData.categoryId}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={masterDataLoading}
                   >
                     <option value="">Chọn danh mục</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440001">Công nghệ thông tin & Truyền thông</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440002">Công nghệ sinh học & Y dược</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440003">Vật liệu mới & Công nghệ vật liệu</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440004">Cơ khí & Tự động hóa</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440005">Năng lượng & Môi trường</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440006">Nông nghiệp & Thực phẩm</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440007">Giao thông vận tải</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440008">Xây dựng & Kiến trúc</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440009">Khoa học xã hội & Nhân văn</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440010">Liên ngành & Khác</option>
+                    {masterData?.categories.map((category) => (
+                      <option key={category.value} value={category.value}>
+                        {category.label}
+                      </option>
+                    ))}
                   </select>
                   <p className="text-xs text-gray-500 mt-1">
                     Danh mục giúp phân loại và tìm kiếm công nghệ dễ dàng hơn trên sàn giao dịch
@@ -1183,7 +1168,7 @@ export default function RegisterTechnologyPage() {
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">3. Chủ sở hữu công nghệ</h2>
+                <h2 className="text-lg font-semibold text-gray-900">3. Chủ sở hữu công nghệ *</h2>
                 <button
                   type="button"
                   onClick={addOwner}
@@ -1255,7 +1240,7 @@ export default function RegisterTechnologyPage() {
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">4. Sở hữu trí tuệ (IP)</h2>
+                <h2 className="text-lg font-semibold text-gray-900">4. Sở hữu trí tuệ (IP) *</h2>
                 <button
                   type="button"
                   onClick={addIPDetail}
@@ -1281,14 +1266,14 @@ export default function RegisterTechnologyPage() {
                           setSelectedIPType(e.target.value);
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        disabled={masterDataLoading}
                       >
                         <option value="">Chọn loại hình IP</option>
-                        <option value="PATENT">Sáng chế (Patent)</option>
-                        <option value="UTILITY_MODEL">Giải pháp hữu ích</option>
-                        <option value="INDUSTRIAL_DESIGN">Kiểu dáng công nghiệp</option>
-                        <option value="TRADEMARK">Nhãn hiệu</option>
-                        <option value="COPYRIGHT">Quyền tác giả</option>
-                        <option value="TRADE_SECRET">Bí mật kinh doanh</option>
+                        {masterData?.ipTypes.map((ipType) => (
+                          <option key={ipType.value} value={ipType.value}>
+                            {ipType.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   <div>
@@ -1311,12 +1296,14 @@ export default function RegisterTechnologyPage() {
                       value={ip.status}
                       onChange={(e) => updateIPDetail(index, 'status', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={masterDataLoading}
                     >
                       <option value="">Chọn tình trạng</option>
-                      <option value="PENDING">Đang nộp</option>
-                      <option value="GRANTED">Đã được cấp</option>
-                      <option value="EXPIRED">Hết hiệu lực</option>
-                      <option value="REJECTED">Bị từ chối</option>
+                      {masterData?.ipStatuses.map((status) => (
+                        <option key={status.value} value={status.value}>
+                          {status.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                     <div className="flex items-end">
@@ -1345,7 +1332,7 @@ export default function RegisterTechnologyPage() {
           {/* 5. Pháp lý & Lãnh thổ */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">5. Pháp lý & Lãnh thổ</h2>
+              <h2 className="text-lg font-semibold text-gray-900">5. Pháp lý & Lãnh thổ *</h2>
             </div>
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1355,15 +1342,7 @@ export default function RegisterTechnologyPage() {
                     Phạm vi bảo hộ/chứng nhận (chọn nhiều)
                   </label>
                   <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
-                    {[
-                      { value: 'VN (Cục SHTT)', tooltip: 'Bảo hộ trong lãnh thổ Việt Nam' },
-                      { value: 'PCT (đơn quốc tế)', tooltip: 'Đơn quốc tế, chưa phải bằng sáng chế' },
-                      { value: 'EP/EPO (Châu Âu)', tooltip: 'Văn phòng sáng chế châu Âu' },
-                      { value: 'US/USPTO (Hoa Kỳ)', tooltip: 'Cơ quan sáng chế và nhãn hiệu Hoa Kỳ' },
-                      { value: 'CN/CNIPA (Trung Quốc)', tooltip: 'Cơ quan sở hữu trí tuệ Trung Quốc' },
-                      { value: 'JP/JPO (Nhật Bản)', tooltip: 'Cơ quan sáng chế Nhật Bản' },
-                      { value: 'WO khác...', tooltip: 'Các tổ chức quốc tế khác' }
-                    ].map((territory) => (
+                    {masterData?.protectionTerritories.map((territory) => (
                       <label key={territory.value} className="flex items-center group">
                         <input
                           type="checkbox"
@@ -1391,15 +1370,7 @@ export default function RegisterTechnologyPage() {
                     Chứng nhận tiêu chuẩn/quy chuẩn (chọn nhiều)
                   </label>
                   <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
-                    {[
-                      { value: 'CE Marking (EU)', tooltip: 'Chứng nhận tuân thủ quy định châu Âu' },
-                      { value: 'FDA Approval (US)', tooltip: 'Phê duyệt của Cơ quan Quản lý Thực phẩm và Dược phẩm Mỹ' },
-                      { value: 'ISO 9001 (QMS)', tooltip: 'Hệ thống quản lý chất lượng quốc tế' },
-                      { value: 'ISO/IEC 27001 (ISMS)', tooltip: 'Hệ thống quản lý an ninh thông tin' },
-                      { value: 'ISO 13485 (Thiết bị y tế)', tooltip: 'Hệ thống quản lý chất lượng thiết bị y tế' },
-                      { value: 'IEC/EN (thiết bị điện – điện tử)', tooltip: 'Tiêu chuẩn quốc tế về thiết bị điện tử' },
-                      { value: 'Khác...', tooltip: 'Các chứng nhận tiêu chuẩn khác' }
-                    ].map((certification) => (
+                    {masterData?.certifications.map((certification) => (
                       <label key={certification.value} className="flex items-center group">
                         <input
                           type="checkbox"
@@ -1553,14 +1524,7 @@ export default function RegisterTechnologyPage() {
                   Phương án thương mại hóa (chọn nhiều)
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {[
-                    { value: 'B2B', tooltip: 'Bán cho doanh nghiệp khác' },
-                    { value: 'B2C', tooltip: 'Bán trực tiếp cho người tiêu dùng' },
-                    { value: 'Licensing', tooltip: 'Cấp phép sử dụng công nghệ' },
-                    { value: 'OEM/ODM', tooltip: 'Sản xuất theo đơn đặt hàng' },
-                    { value: 'Joint Venture', tooltip: 'Liên doanh với đối tác' },
-                    { value: 'Spin-off', tooltip: 'Tách ra thành công ty riêng' }
-                  ].map((method) => (
+                  {masterData?.commercializationMethods.map((method) => (
                     <label key={method.value} className="flex items-center group">
                       <input
                         type="checkbox"
@@ -1603,14 +1567,7 @@ export default function RegisterTechnologyPage() {
                   Hình thức chuyển quyền (chọn nhiều)
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {[
-                    { value: 'Chuyển nhượng toàn bộ', tooltip: 'Bán hoàn toàn quyền sở hữu' },
-                    { value: 'Chuyển nhượng một phần', tooltip: 'Bán một phần quyền sở hữu' },
-                    { value: 'License độc quyền', tooltip: 'Cấp phép độc quyền cho một bên' },
-                    { value: 'License không độc quyền', tooltip: 'Cấp phép cho nhiều bên' },
-                    { value: 'Sub-license', tooltip: 'Cho phép bên được cấp phép cấp lại' },
-                    { value: 'Kèm dịch vụ kỹ thuật', tooltip: 'Bao gồm hỗ trợ kỹ thuật, training' }
-                  ].map((method) => (
+                  {masterData?.transferMethods.map((method) => (
                     <label key={method.value} className="flex items-center group">
                       <input
                         type="checkbox"
@@ -2055,6 +2012,7 @@ export default function RegisterTechnologyPage() {
           </div>
         </form>
       </div>
+
     </div>
   );
 }

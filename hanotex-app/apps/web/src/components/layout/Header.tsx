@@ -19,7 +19,6 @@ import {
   Calendar,
   Users,
   Shield,
-  TrendingUp,
   LogIn,
   UserPlus
 } from 'lucide-react';
@@ -60,17 +59,6 @@ export default function Header() {
       ]
     },
     {
-      name: 'Đấu giá',
-      href: '/auctions',
-      icon: TrendingUp,
-      submenu: [
-        { name: 'Đấu giá đang diễn ra', href: '/auctions' },
-        { name: 'Đấu giá sắp diễn ra', href: '/auctions?filter=upcoming' },
-        { name: 'Lịch sử đấu giá', href: '/auctions?filter=completed' },
-        { name: 'Tham gia đấu giá', href: '/auctions/participate' }
-      ]
-    },
-    {
       name: 'Tin tức',
       href: '/news',
       icon: FileText,
@@ -98,7 +86,6 @@ export default function Header() {
     { name: 'Hồ sơ cá nhân', href: '/profile' },
     { name: 'Công nghệ của tôi', href: '/my-technologies' },
     { name: 'Nhu cầu của tôi', href: '/my-demands' },
-    { name: 'Đấu giá tham gia', href: '/my-auctions' },
     { name: 'Tin nhắn', href: '/messages' },
     { name: 'Cài đặt', href: '/settings' },
     { name: 'Đăng xuất', href: '#', action: logout }

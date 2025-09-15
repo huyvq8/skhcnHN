@@ -6,8 +6,13 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
+    // Use local API routes when in development
+    const baseURL = process.env.NODE_ENV === 'development' 
+      ? '/api' // Use local Next.js API routes
+      : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1');
+      
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1',
+      baseURL,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',

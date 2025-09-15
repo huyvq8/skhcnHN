@@ -5,6 +5,7 @@ import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import ChatbotWrapper from '@/components/chatbot/ChatbotWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -109,6 +110,7 @@ export default function RootLayout({
               },
             }}
           />
+          {/* <ChatbotWrapper /> */}
         </Providers>
       </body>
     </html>

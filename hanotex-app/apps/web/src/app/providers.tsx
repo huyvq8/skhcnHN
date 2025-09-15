@@ -2,7 +2,14 @@
 
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import { SessionProvider } from 'next-auth/react';
 import { useState } from 'react';
+import { useAuthSync } from '@/store/auth';
+
+function AuthSync({ children }: { children: React.ReactNode }) {
+  useAuthSync();
+  return <>{children}</>;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -29,12 +36,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
-    </QueryClientProvider>
+    <SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthSync>
+          {children}
+        </AuthSync>
+        {process.env.NODE_ENV === 'development' && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
+      </QueryClientProvider>
+    </SessionProvider>
   );
 }
 

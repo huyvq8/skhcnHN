@@ -9,9 +9,10 @@ const nextConfig = {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   },
   async rewrites() {
+    // Only proxy non-auth API routes to backend
     return [
       {
-        source: '/api/:path*',
+        source: '/api/backend/:path*',
         destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'}/:path*`,
       },
     ];

@@ -1,5 +1,6 @@
+'use client';
+
 import { Suspense } from 'react';
-import { Metadata } from 'next';
 import HeroSection from '@/components/home/HeroSection';
 import IntroSection from '@/components/home/IntroSection';
 import CategoriesSection from '@/components/home/CategoriesSection';
@@ -14,10 +15,7 @@ import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/home/CTASection';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-export const metadata: Metadata = {
-  title: 'Trang chủ - HANOTEX',
-  description: 'Sàn giao dịch công nghệ trực tuyến của thành phố Hà Nội. Kết nối doanh nghiệp, viện nghiên cứu và cá nhân trong lĩnh vực khoa học công nghệ.',
-};
+// Metadata moved to layout.tsx since this is now a client component
 
 export default function HomePage() {
   return (

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useSession, signIn, signOut } from 'next-auth/react';
+import { useEffect } from 'react';
 import { User, AuthState, LoginRequest, RegisterRequest } from '@/types';
 import apiClient from '@/lib/api';
 
@@ -134,24 +135,31 @@ export const useAuthStore = create<AuthStore>()(
 // Hook to sync NextAuth session with Zustand store
 export const useAuthSync = () => {
   const { data: session, status } = useSession();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, token } = useAuthStore();
 
-  // Sync NextAuth session with Zustand store
-  if (status === 'authenticated' && session?.user) {
-    // Always sync when authenticated, regardless of current state
-    useAuthStore.setState({
-      user: session.user as any,
-      isAuthenticated: true,
-      token: session.apiToken || null,
-    });
-  } else if (status === 'unauthenticated') {
-    // Clear auth state when unauthenticated
-    useAuthStore.setState({
-      user: null,
-      isAuthenticated: false,
-      token: null,
-    });
-  }
+  useEffect(() => {
+    // Sync NextAuth session with Zustand store
+    if (status === 'authenticated' && session?.user) {
+      // Only sync if the data has actually changed
+      const newUser = session.user as any;
+      const newToken = session.apiToken || null;
+      
+      if (!isAuthenticated || user?.id !== newUser?.id || token !== newToken) {
+        useAuthStore.setState({
+          user: newUser,
+          isAuthenticated: true,
+          token: newToken,
+        });
+      }
+    } else if (status === 'unauthenticated' && isAuthenticated) {
+      // Only clear if currently authenticated
+      useAuthStore.setState({
+        user: null,
+        isAuthenticated: false,
+        token: null,
+      });
+    }
+  }, [status, session, user, isAuthenticated, token]);
 };
 
 // Selectors

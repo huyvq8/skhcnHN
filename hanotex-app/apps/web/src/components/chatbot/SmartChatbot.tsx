@@ -348,12 +348,7 @@ export default function SmartChatbot({ isOpen, onToggle, context = 'general' }: 
       return;
     }
     
-    // If action has href, open it in new tab
-    if (action.href) {
-      window.open(action.href, '_blank');
-    }
-    
-    // Always add interaction message for better UX
+    // Always add interaction message first for better UX
     const actionMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -379,6 +374,13 @@ export default function SmartChatbot({ isOpen, onToggle, context = 'general' }: 
       };
 
       setMessages(prev => [...prev, botMessage]);
+      
+      // Open link after showing the response
+      if (action.href) {
+        setTimeout(() => {
+          window.open(action.href, '_blank');
+        }, 1000);
+      }
     }, 500);
   };
 

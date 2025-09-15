@@ -137,13 +137,15 @@ export const useAuthSync = () => {
   const { user, isAuthenticated } = useAuthStore();
 
   // Sync NextAuth session with Zustand store
-  if (status === 'authenticated' && session?.user && !isAuthenticated) {
+  if (status === 'authenticated' && session?.user) {
+    // Always sync when authenticated, regardless of current state
     useAuthStore.setState({
       user: session.user as any,
       isAuthenticated: true,
       token: session.apiToken || null,
     });
-  } else if (status === 'unauthenticated' && isAuthenticated) {
+  } else if (status === 'unauthenticated') {
+    // Clear auth state when unauthenticated
     useAuthStore.setState({
       user: null,
       isAuthenticated: false,

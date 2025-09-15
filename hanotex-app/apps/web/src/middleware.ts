@@ -14,10 +14,18 @@ export default withAuth(
     }
 
     // Protected routes that require authentication
-    if (pathname.startsWith('/profile') || pathname.startsWith('/technologies/register')) {
-      if (!token) {
-        return NextResponse.redirect(new URL('/auth/login', req.url));
-      }
+    const protectedRoutes = [
+      '/profile',
+      '/technologies/register',
+      '/my-technologies',
+      '/my-demands',
+      '/messages',
+      '/settings'
+    ];
+    
+    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+    if (isProtectedRoute && !token) {
+      return NextResponse.redirect(new URL('/auth/login', req.url));
     }
 
     // Allow all auth routes to pass through
@@ -38,7 +46,18 @@ export default withAuth(
         }
         
         // Require authentication for protected routes
-        if (pathname.startsWith('/profile') || pathname.startsWith('/admin') || pathname.startsWith('/technologies/register')) {
+        const protectedRoutes = [
+          '/profile',
+          '/admin',
+          '/technologies/register',
+          '/my-technologies',
+          '/my-demands',
+          '/messages',
+          '/settings'
+        ];
+        
+        const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+        if (isProtectedRoute) {
           return !!token;
         }
         
@@ -52,6 +71,10 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/profile/:path*',
-    '/technologies/register'
+    '/technologies/register',
+    '/my-technologies/:path*',
+    '/my-demands/:path*',
+    '/messages/:path*',
+    '/settings/:path*'
   ]
 };

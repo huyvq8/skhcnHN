@@ -236,12 +236,14 @@ export default function SmartChatbot({ isOpen, onToggle, context = 'general' }: 
             {
               label: 'Đăng ký môi giới',
               action: 'register_broker',
-              icon: <Users className="h-4 w-4" />
+              icon: <Users className="h-4 w-4" />,
+              href: '/services/legal'
             },
             {
               label: 'Xem cơ hội môi giới',
               action: 'browse_opportunities',
-              icon: <Search className="h-4 w-4" />
+              icon: <Search className="h-4 w-4" />,
+              href: '/technologies'
             }
           ]
         };
@@ -266,7 +268,8 @@ export default function SmartChatbot({ isOpen, onToggle, context = 'general' }: 
             {
               label: 'Tư vấn pháp lý',
               action: 'legal_consultation',
-              icon: <HelpCircle className="h-4 w-4" />
+              icon: <HelpCircle className="h-4 w-4" />,
+              href: '/contact'
             }
           ]
         };
@@ -334,11 +337,7 @@ export default function SmartChatbot({ isOpen, onToggle, context = 'general' }: 
   };
 
   const handleQuickAction = (action: QuickAction) => {
-    if (action.href) {
-      window.open(action.href, '_blank');
-    }
-    
-    // Handle special actions
+    // Handle special actions first
     if (action.action === 'open_register_form') {
       setShowStepGuide(true);
       return;
@@ -349,6 +348,12 @@ export default function SmartChatbot({ isOpen, onToggle, context = 'general' }: 
       return;
     }
     
+    // If action has href, open it in new tab
+    if (action.href) {
+      window.open(action.href, '_blank');
+    }
+    
+    // Always add interaction message for better UX
     const actionMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -358,6 +363,7 @@ export default function SmartChatbot({ isOpen, onToggle, context = 'general' }: 
 
     setMessages(prev => [...prev, actionMessage]);
     
+    // Generate response after a short delay
     setTimeout(() => {
       const intent = recognizeIntent(actionMessage.content);
       const response = getResponseForIntent(intent, actionMessage.content);

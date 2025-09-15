@@ -39,7 +39,7 @@ class ApiClient {
         if (error.response?.status === 401) {
           this.clearToken();
           // Redirect to login if not already there
-          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          if (typeof window !== 'undefined' && window.location && !window.location.pathname.includes('/login')) {
             window.location.href = '/login';
           }
         }

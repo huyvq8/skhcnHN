@@ -1,136 +1,221 @@
-# HANOTEX Intelligent Chatbot
+# HANOTEX Smart Chatbot
 
 ## Tổng quan
 
-Chatbot thông minh của HANOTEX được thiết kế để hỗ trợ người dùng trong việc đăng ký và quản lý sản phẩm khoa học công nghệ.
-
-## Cấu trúc Components
-
-### 1. IntelligentChatbot.tsx
-- **Mục đích**: Chatbot đầy đủ tính năng cho trang đăng ký sản phẩm
-- **Tính năng**:
-  - Hướng dẫn chi tiết từng bước đăng ký
-  - Giải thích thuật ngữ chuyên môn (TRL, IP, etc.)
-  - Gợi ý nội dung phù hợp
-  - Hỗ trợ OCR và tự động điền form
-  - Gợi ý câu hỏi thường gặp
-
-### 2. SimpleChatbot.tsx
-- **Mục đích**: Chatbot đơn giản cho các trang khác
-- **Tính năng**:
-  - Trả lời câu hỏi cơ bản về HANOTEX
-  - Hướng dẫn sử dụng sàn giao dịch
-  - Thông tin liên hệ và hỗ trợ
-
-### 3. GlobalChatbot.tsx
-- **Mục đích**: Component quản lý chatbot toàn cục
-- **Tính năng**:
-  - Tự động chọn loại chatbot phù hợp
-  - Auto-open cho người dùng mới
-  - Quản lý trạng thái chatbot
+HANOTEX Smart Chatbot là một trợ lý thông minh được thiết kế để hỗ trợ người dùng thực hiện các hoạt động chính trên sàn giao dịch công nghệ HANOTEX. Chatbot sử dụng AI để nhận diện ý định (intent) của người dùng và cung cấp hướng dẫn step-by-step phù hợp.
 
 ## Tính năng chính
 
-### 🤖 Trí tuệ nhân tạo
-- **Natural Language Processing**: Hiểu và xử lý câu hỏi tiếng Việt
-- **Context Awareness**: Nhận biết ngữ cảnh và đưa ra câu trả lời phù hợp
-- **Learning**: Cải thiện qua tương tác với người dùng
+### 1. Nhận diện Intent thông minh
+- **Đăng công nghệ**: Hướng dẫn quy trình đăng sản phẩm KH&CN
+- **Tìm nhu cầu**: Hỗ trợ tìm kiếm nhu cầu công nghệ phù hợp
+- **Đầu tư**: Hướng dẫn tham gia đầu tư và kết nối với dự án
+- **Môi giới**: Hỗ trợ hoạt động môi giới công nghệ
+- **Pháp lý**: Tư vấn và hỗ trợ pháp lý
+- **Định giá**: Hướng dẫn yêu cầu định giá và thẩm định
 
-### 📚 Kiến thức chuyên sâu
-- **TRL (Technology Readiness Level)**: Giải thích 9 mức độ phát triển công nghệ
-- **Sở hữu trí tuệ**: Patent, Trademark, Copyright, Trade Secret
-- **Pháp lý & Lãnh thổ**: Bảo hộ, chứng nhận tiêu chuẩn
-- **Quy trình đăng ký**: Hướng dẫn từng bước chi tiết
+### 2. Step-by-step Guidance
+- **Checklist tương tác**: Hướng dẫn từng bước với checkbox
+- **Thời gian ước tính**: Hiển thị thời gian cần thiết cho mỗi bước
+- **Yêu cầu và mẹo**: Cung cấp thông tin chi tiết cho từng bước
+- **Tiến độ theo dõi**: Theo dõi tiến độ hoàn thành
 
-### 🎯 Hỗ trợ đăng ký sản phẩm
-- **Hướng dẫn form**: Giải thích từng trường thông tin
-- **Validation**: Kiểm tra và gợi ý sửa lỗi
-- **OCR Integration**: Hỗ trợ đọc tài liệu tự động
-- **Best Practices**: Mẹo và kinh nghiệm đăng ký hiệu quả
+### 3. Template Generator
+- **Mẫu mô tả công nghệ**: Tạo template chuẩn cho mô tả sản phẩm
+- **Form động**: Điền thông tin và tạo nội dung tự động
+- **Export/Import**: Tải xuống và sao chép nội dung
 
-### 💡 Gợi ý thông minh
-- **Quick Actions**: Các hành động nhanh
-- **Suggested Questions**: Câu hỏi thường gặp
-- **Contextual Help**: Hỗ trợ theo ngữ cảnh
-- **Progressive Disclosure**: Hiển thị thông tin theo mức độ
+### 4. Quick Actions
+- **Nút hành động nhanh**: Truy cập trực tiếp các chức năng
+- **Link điều hướng**: Mở trang liên quan trong tab mới
+- **Context-aware**: Hiển thị actions phù hợp với ngữ cảnh
 
 ## Cách sử dụng
 
-### Cho người dùng mới
-1. Truy cập trang đăng ký sản phẩm
-2. Chatbot sẽ tự động hiện ra sau 3 giây
-3. Chọn câu hỏi gợi ý hoặc nhập câu hỏi riêng
-4. Nhận hướng dẫn chi tiết và hỗ trợ
-
-### Cho người dùng có kinh nghiệm
-1. Click vào icon chatbot ở góc phải màn hình
-2. Hỏi trực tiếp về vấn đề cần hỗ trợ
-3. Nhận câu trả lời nhanh chóng và chính xác
-
-## Tích hợp
-
-### Layout chính
-```tsx
-import GlobalChatbot from '@/components/chatbot/GlobalChatbot';
-
-// Trong RootLayout
-<GlobalChatbot />
+### 1. Khởi động Chatbot
+```typescript
+// Chatbot sẽ tự động xuất hiện ở góc phải màn hình
+// Click vào icon MessageCircle để mở/đóng
 ```
 
-### Trang đăng ký
-```tsx
-import IntelligentChatbot from '@/components/chatbot/IntelligentChatbot';
+### 2. Tương tác với Chatbot
+```
+Người dùng: "Tôi muốn đăng công nghệ AI xử lý ảnh y tế"
 
-// Tự động hiển thị chatbot thông minh
+Chatbot: "Tuyệt! Tôi sẽ hướng dẫn bạn đăng công nghệ từng bước:"
+- Hiển thị 6 bước checklist
+- Quick actions: "Mở form đăng công nghệ", "Tải mẫu mô tả"
+```
+
+### 3. Sử dụng Step Guide
+- Click "Mở form đăng công nghệ" để xem hướng dẫn chi tiết
+- Hoàn thành từng bước theo checklist
+- Theo dõi tiến độ hoàn thành
+- Nhận mẹo và yêu cầu cho từng bước
+
+### 4. Tạo Template
+- Click "Tải mẫu mô tả" để mở Template Generator
+- Chọn mẫu phù hợp
+- Điền thông tin vào form
+- Tạo và tải xuống nội dung
+
+## Cấu trúc Code
+
+### Components chính
+
+#### 1. SmartChatbot.tsx
+- Component chính của chatbot
+- Xử lý logic nhận diện intent
+- Quản lý state và tương tác
+
+#### 2. StepGuide.tsx
+- Hiển thị checklist tương tác
+- Theo dõi tiến độ hoàn thành
+- Cung cấp thông tin chi tiết cho từng bước
+
+#### 3. TemplateGenerator.tsx
+- Tạo và quản lý template
+- Form động với các loại field khác nhau
+- Export/Import nội dung
+
+### Intent Recognition
+
+```typescript
+const recognizeIntent = (message: string): string => {
+  const lowerMessage = message.toLowerCase();
+  
+  if (lowerMessage.includes('đăng') && lowerMessage.includes('công nghệ')) {
+    return 'register_technology';
+  }
+  // ... các intent khác
+};
+```
+
+### Response Generation
+
+```typescript
+const getResponseForIntent = (intent: string, message: string) => {
+  switch (intent) {
+    case 'register_technology':
+      return {
+        content: "Tuyệt! Tôi sẽ hướng dẫn bạn đăng công nghệ từng bước:",
+        steps: [...],
+        quickActions: [...]
+      };
+    // ... các response khác
+  }
+};
 ```
 
 ## Customization
 
-### Thêm câu trả lời mới
-```tsx
-// Trong getBotResponse function
-if (message.includes('keyword')) {
-  return 'Câu trả lời mới...';
+### Thêm Intent mới
+1. Cập nhật `recognizeIntent()` function
+2. Thêm case mới trong `getResponseForIntent()`
+3. Định nghĩa steps và quickActions
+
+### Thêm Template mới
+1. Tạo template object với structure chuẩn
+2. Thêm vào `technologyTemplates` array
+3. Định nghĩa fields và content
+
+### Thêm Step mới
+1. Cập nhật steps array trong StepGuide
+2. Định nghĩa requirements và tips
+3. Thiết lập estimatedTime
+
+## Best Practices
+
+### 1. Intent Recognition
+- Sử dụng từ khóa rõ ràng và đa dạng
+- Xử lý các biến thể của cùng một ý định
+- Fallback cho các intent không xác định
+
+### 2. Step Design
+- Chia nhỏ các bước phức tạp
+- Cung cấp thời gian ước tính thực tế
+- Đưa ra yêu cầu và mẹo hữu ích
+
+### 3. Template Design
+- Sử dụng placeholder rõ ràng ({{field_name}})
+- Cung cấp options cho select fields
+- Validation cho required fields
+
+### 4. UX/UI
+- Responsive design cho mobile
+- Loading states cho các action dài
+- Clear visual hierarchy
+- Accessible design
+
+## Testing
+
+### 1. Intent Recognition Testing
+```typescript
+// Test cases
+const testCases = [
+  { input: "đăng công nghệ", expected: "register_technology" },
+  { input: "tìm nhu cầu", expected: "search_demand" },
+  { input: "đầu tư", expected: "investment" }
+];
+```
+
+### 2. Step Guide Testing
+- Test completion flow
+- Test progress tracking
+- Test error handling
+
+### 3. Template Testing
+- Test form validation
+- Test content generation
+- Test export functionality
+
+## Future Enhancements
+
+### 1. AI Integration
+- Tích hợp với AI model để cải thiện intent recognition
+- Natural language processing cho câu hỏi phức tạp
+- Context awareness và memory
+
+### 2. Analytics
+- Tracking user interactions
+- Success rate của các intent
+- Optimization dựa trên data
+
+### 3. Multi-language Support
+- Hỗ trợ tiếng Anh
+- Localization cho các region khác
+
+### 4. Advanced Features
+- Voice interaction
+- Image recognition
+- Document analysis
+- Integration với external APIs
+
+## Troubleshooting
+
+### 1. Common Issues
+- **Intent không được nhận diện**: Kiểm tra từ khóa trong `recognizeIntent()`
+- **Template không tạo được**: Kiểm tra placeholder syntax
+- **Step không hoàn thành**: Kiểm tra logic trong `handleStepClick()`
+
+### 2. Debug Mode
+```typescript
+// Enable debug logging
+const DEBUG = true;
+if (DEBUG) {
+  console.log('Intent recognized:', intent);
+  console.log('Response generated:', response);
 }
 ```
 
-### Thêm gợi ý
-```tsx
-suggestions: [
-  'Gợi ý 1',
-  'Gợi ý 2',
-  'Gợi ý 3'
-]
-```
-
-### Tùy chỉnh UI
-```tsx
-// Thay đổi màu sắc, kích thước, vị trí
-className="fixed bottom-6 right-6 bg-blue-600..."
-```
-
-## Roadmap
-
-### Phase 1 ✅
-- [x] Chatbot cơ bản
-- [x] Tích hợp vào layout
-- [x] Hướng dẫn đăng ký sản phẩm
-
-### Phase 2 🚧
-- [ ] Machine Learning integration
-- [ ] Multi-language support
-- [ ] Voice input/output
-- [ ] Advanced analytics
-
-### Phase 3 📋
-- [ ] AI-powered recommendations
-- [ ] Integration with external APIs
-- [ ] Real-time collaboration
-- [ ] Advanced personalization
+### 3. Performance
+- Lazy loading cho các component lớn
+- Memoization cho expensive operations
+- Debouncing cho user input
 
 ## Support
 
-Nếu cần hỗ trợ về chatbot, vui lòng liên hệ:
-- Email: dev@hanotex.vn
-- GitHub: [HANOTEX Repository]
-- Documentation: [Internal Wiki]
+Để được hỗ trợ hoặc báo cáo lỗi, vui lòng liên hệ:
+- Email: support@hanotex.com
+- GitHub Issues: [Link to repository]
+- Documentation: [Link to docs]

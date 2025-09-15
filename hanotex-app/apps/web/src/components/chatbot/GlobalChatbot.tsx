@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
+import SmartChatbot from './SmartChatbot';
 import IntelligentChatbot from './IntelligentChatbot';
 import SimpleChatbot from './SimpleChatbot';
 
@@ -27,24 +28,12 @@ export default function GlobalChatbot() {
   const isRegisterPage = pathname === '/technologies/register';
   const isGeneralPage = !isRegisterPage;
 
-  // For register page - specialized chatbot for product registration
-  if (isRegisterPage) {
-    return (
-      <IntelligentChatbot 
-        isOpen={isOpen} 
-        onToggle={() => setIsOpen(!isOpen)}
-        context="register"
-      />
-    );
-  }
-
-  // For general pages - general support chatbot
+  // Use SmartChatbot for all pages with context-specific behavior
   return (
-    <SimpleChatbot 
+    <SmartChatbot 
       isOpen={isOpen} 
       onToggle={() => setIsOpen(!isOpen)}
-      context="general"
-      isAuthenticated={isAuthenticated}
+      context={isRegisterPage ? "register" : context}
     />
   );
 }

@@ -84,11 +84,11 @@ export default function TechnologiesPage() {
           if (searchQuery.trim()) {
             const searchLower = searchQuery.toLowerCase();
             filteredData = filteredData.filter(tech => 
-              tech.title.toLowerCase().includes(searchLower) ||
-              tech.public_summary.toLowerCase().includes(searchLower) ||
-              tech.category_name.toLowerCase().includes(searchLower) ||
-              (tech.owners && tech.owners.some(owner => 
-                owner.owner_name.toLowerCase().includes(searchLower)
+              (tech.title && tech.title.toLowerCase().includes(searchLower)) ||
+              (tech.public_summary && tech.public_summary.toLowerCase().includes(searchLower)) ||
+              (tech.category_name && tech.category_name.toLowerCase().includes(searchLower)) ||
+              (tech.owners && tech.owners.some((owner: any) => 
+                owner.owner_name && owner.owner_name.toLowerCase().includes(searchLower)
               ))
             );
           }
@@ -107,7 +107,7 @@ export default function TechnologiesPage() {
                 '7': 'Xây dựng & Kiến trúc',
                 '8': 'Giao thông vận tải'
               };
-              return tech.category_name === categoryMap[filters.category];
+              return tech.category_name && tech.category_name === categoryMap[filters.category];
             });
           }
           

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/store/auth';
 import { 
   Search, 
   Filter, 
@@ -15,7 +17,8 @@ import {
   Clock,
   Users,
   ArrowRight,
-  Plus
+  Plus,
+  Send
 } from 'lucide-react';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import apiClient from '@/lib/api';
@@ -35,6 +38,8 @@ interface Demand {
 }
 
 export default function DemandsPage() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [demands, setDemands] = useState<Demand[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -375,10 +380,24 @@ export default function DemandsPage() {
                       </div>
                     </div>
 
-                    <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                      Xem chi tiết
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </button>
+                    <div className="space-y-2">
+                      <button 
+                        onClick={() => router.push(`/demands/${demand.id}`)}
+                        className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Xem chi tiết
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </button>
+                      {isAuthenticated && (
+                        <button 
+                          onClick={() => router.push(`/demands/${demand.id}/propose`)}
+                          className="w-full flex items-center justify-center px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                        >
+                          Đề xuất giải pháp
+                          <Send className="ml-2 h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </>
                 ) : (
                   // List View
@@ -422,10 +441,24 @@ export default function DemandsPage() {
                       </div>
                     </div>
 
-                    <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                      Xem chi tiết
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </button>
+                    <div className="flex flex-col space-y-2">
+                      <button 
+                        onClick={() => router.push(`/demands/${demand.id}`)}
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Xem chi tiết
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </button>
+                      {isAuthenticated && (
+                        <button 
+                          onClick={() => router.push(`/demands/${demand.id}/propose`)}
+                          className="flex items-center px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                        >
+                          Đề xuất
+                          <Send className="ml-2 h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

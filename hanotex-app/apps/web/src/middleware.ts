@@ -6,6 +6,9 @@ export default withAuth(
     const token = req.nextauth.token;
     const { pathname } = req.nextUrl;
 
+    // Debug log
+    console.log('Middleware check:', { pathname, hasToken: !!token, token: token ? 'exists' : 'null' });
+
     // Admin routes protection
     if (pathname.startsWith('/admin')) {
       if (!token || !['ADMIN', 'SUPER_ADMIN'].includes(token.role as string)) {
@@ -25,6 +28,7 @@ export default withAuth(
     
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
     if (isProtectedRoute && !token) {
+      console.log('Redirecting to login for protected route:', pathname);
       return NextResponse.redirect(new URL('/auth/login', req.url));
     }
 

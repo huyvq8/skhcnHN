@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { useAuthStore } from '@/store/auth';
+import { useAuth } from '@/store/auth';
 import SmartChatbot from './SmartChatbot';
 
 export default function ChatbotWrapper() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
 
   // Auto-open chatbot for new users on register page
   useEffect(() => {

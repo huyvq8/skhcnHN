@@ -110,7 +110,7 @@ export default function RootLayout({
               },
             }}
           />
-          {/* <ChatbotWrapper /> */}
+          <ChatbotWrapper />
         </Providers>
       </body>
     </html>

@@ -104,29 +104,26 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center">
               <div className="bg-blue-600 text-white px-3 py-2 rounded-lg font-bold text-lg">
                 HANOTEX
               </div>
-              <span className="hidden sm:block text-sm text-gray-600">
-                Sàn giao dịch công nghệ Hà Nội
-              </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-0.5">
             {mainMenuItems.map((item) => (
               <div key={item.name} className="relative group">
                 <Link
                   href={item.href}
-                  className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center px-2 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive(item.href)
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
-                  <item.icon className="h-4 w-4 mr-2" />
+                  <item.icon className="h-4 w-4 mr-1.5" />
                   {item.name}
                   {item.submenu && (
                     <ChevronDown className="h-4 w-4 ml-1" />

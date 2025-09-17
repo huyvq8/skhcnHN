@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/store/auth';
 import { useMasterData } from '@/hooks/useMasterData';
+import { useFormProgress } from '@/hooks/useFormProgress';
+import FormProgress from '@/components/ui/FormProgress';
 import { 
   ArrowLeft,
   Save,
@@ -105,6 +107,9 @@ export default function RegisterTechnologyPage() {
   });
 
   const [categories, setCategories] = useState([]);
+
+  // Form progress tracking
+  const { steps, currentStep, totalSteps, completedSteps, canSubmit, progressPercentage } = useFormProgress(formData);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -511,6 +516,14 @@ export default function RegisterTechnologyPage() {
                 </div>
               </div>
               <div className="flex space-x-3">
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-900">
+                    {completedSteps}/{totalSteps} bước hoàn thành
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {progressPercentage}% hoàn thành
+                  </div>
+                </div>
                 <button
                   type="button"
                   className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -522,6 +535,13 @@ export default function RegisterTechnologyPage() {
             </div>
           </div>
         </div>
+
+        {/* Form Progress */}
+        <FormProgress
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          steps={steps}
+        />
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -2006,8 +2026,12 @@ export default function RegisterTechnologyPage() {
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || !canSubmit}
+              className={`flex items-center px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
+                canSubmit 
+                  ? 'bg-blue-600 hover:bg-blue-700' 
+                  : 'bg-gray-400 cursor-not-allowed'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {loading ? (
                 <>
@@ -2017,7 +2041,7 @@ export default function RegisterTechnologyPage() {
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Đăng ký công nghệ
+                  {canSubmit ? 'Đăng ký công nghệ' : `Hoàn thành ${completedSteps}/${totalSteps} bước để tiếp tục`}
                 </>
               )}
             </button>

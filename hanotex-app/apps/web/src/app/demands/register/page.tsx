@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
+import { useDemandFormProgress } from '@/hooks/useDemandFormProgress';
+import FormProgress from '@/components/ui/FormProgress';
 import { 
   ArrowLeft,
   Save,
@@ -41,6 +43,9 @@ export default function RegisterDemandPage() {
       timeline: ''
     }
   });
+
+  // Form progress tracking
+  const { steps, currentStep, totalSteps, completedSteps, canSubmit, progressPercentage } = useDemandFormProgress(formData);
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -131,6 +136,14 @@ export default function RegisterDemandPage() {
                 </div>
               </div>
               <div className="flex space-x-3">
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-900">
+                    {completedSteps}/{totalSteps} bước hoàn thành
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {progressPercentage}% hoàn thành
+                  </div>
+                </div>
                 <button
                   type="button"
                   className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -142,6 +155,13 @@ export default function RegisterDemandPage() {
             </div>
           </div>
         </div>
+
+        {/* Form Progress */}
+        <FormProgress
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          steps={steps}
+        />
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -467,8 +487,12 @@ export default function RegisterDemandPage() {
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || !canSubmit}
+              className={`flex items-center px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
+                canSubmit 
+                  ? 'bg-blue-600 hover:bg-blue-700' 
+                  : 'bg-gray-400 cursor-not-allowed'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {loading ? (
                 <>
@@ -478,7 +502,7 @@ export default function RegisterDemandPage() {
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Đăng nhu cầu
+                  {canSubmit ? 'Đăng nhu cầu' : `Hoàn thành ${completedSteps}/${totalSteps} bước để tiếp tục`}
                 </>
               )}
             </button>

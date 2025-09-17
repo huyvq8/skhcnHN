@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { useDemandFormProgress } from '@/hooks/useDemandFormProgress';
-import FormProgress from '@/components/ui/FormProgress';
+import CompactProgressBar from '@/components/ui/CompactProgressBar';
 import { 
   ArrowLeft,
   Save,
@@ -136,14 +136,6 @@ export default function RegisterDemandPage() {
                 </div>
               </div>
               <div className="flex space-x-3">
-                <div className="text-right">
-                  <div className="text-sm font-medium text-gray-900">
-                    {completedSteps}/{totalSteps} bước hoàn thành
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {progressPercentage}% hoàn thành
-                  </div>
-                </div>
                 <button
                   type="button"
                   className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -156,8 +148,8 @@ export default function RegisterDemandPage() {
           </div>
         </div>
 
-        {/* Form Progress */}
-        <FormProgress
+        {/* Compact Progress Bar */}
+        <CompactProgressBar
           currentStep={currentStep}
           totalSteps={totalSteps}
           steps={steps}
